@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  @apply bg-ink;
+  user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
+}
+
+::selection {
+  @apply bg-accent/40;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-raised;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-edge;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}

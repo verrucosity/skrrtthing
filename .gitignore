@@ -1,0 +1,14 @@
+node_modules
+dist
+
+# Tauri
+src-tauri/target
+src-tauri/gen/schemas
+src-tauri/icon-source.png
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.local
