@@ -1,4 +1,5 @@
 import { LazyStore } from "@tauri-apps/plugin-store";
+import { inTauri } from "./env";
 
 /**
  * Persistence lives in two JSON files in the app data directory
@@ -15,8 +16,6 @@ interface Backend {
   get<T>(key: string): Promise<T | null>;
   set(key: string, value: unknown): Promise<void>;
 }
-
-const inTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 function tauriBackend(file: string): Backend {
   const store = new LazyStore(file, { defaults: {}, autoSave: false });

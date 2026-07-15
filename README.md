@@ -20,6 +20,8 @@ stored locally — no server, no account, no telemetry.
 - **Streamlabs donations** via the socket API
 - **Weekly window** — resets every Saturday at midnight (local time). The
   counter itself never resets; each week is archived to a history table
+- **OBS text output** — writes the goal line to a plain `.txt` file that an
+  OBS Text source reads, so the overlay uses whatever font you pick in OBS
 - **Event log** — every contribution with timestamp and point value, clearable
 - **Statistics** — lifetime bits, subs, donations, goals completed, past weeks
 - Auto-reconnect with backoff, keepalive watchdogs, duplicate-event protection
@@ -60,6 +62,20 @@ Streamlabs Dashboard → Settings → API Settings → API Tokens.
 Tokens are stored in plain JSON in the app's data folder on your own machine
 (see [Configuration](#configuration)). Don't commit or share that folder.
 
+## Showing the goal in OBS
+
+GoalDock doesn't render an overlay itself — it writes the goal text to a file
+and OBS does the styling:
+
+1. In GoalDock: Settings → **OBS Text Output** → enable it and pick a file
+   path (e.g. `C:\Users\you\Documents\goaldock.txt`).
+2. In OBS: add a **Text (GDI+)** source, tick **Read from file**, select that
+   file, and choose your font, size and color there.
+
+The file updates the instant a contribution lands, plus a refresh every few
+seconds. The format is customizable with `{current}`, `{target}`, `{stars}`
+and `{remaining}` placeholders — e.g. `WEEKLY !GOAL {current} / {target} {stars}`.
+
 ## Development
 
 Prerequisites: [Node.js](https://nodejs.org) 20+, [Rust](https://rustup.rs)
@@ -80,8 +96,11 @@ persistence — handy for UI work without a Rust build.
 npm run tauri build
 ```
 
-Installers land in `src-tauri/target/release/bundle/`. To regenerate the app
-icons from the procedural source: `npm run icon`.
+Installers land in `src-tauri/target/release/bundle/`.
+
+The repo ships with a plain flat square as the app icon. To use your own,
+drop a 1024x1024 `app-icon.png` in the repo root and run `npm run icon` —
+it regenerates every platform format in `src-tauri/icons/`.
 
 ## Configuration
 

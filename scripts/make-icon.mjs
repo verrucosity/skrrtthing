@@ -1,70 +1,58 @@
-// Generates src-tauri/icon-source.png (1024x1024): a purple rounded square
-// with a target mark. `npm run icon` feeds it to `tauri icon`, which produces
-// every platform format in src-tauri/icons/. No image dependencies needed.
+// Prepares src-tauri/icon-source.png for `tauri icon` (run via `npm run icon`).
+//
+// If an app-icon.png exists in the repo root, it is used as-is — drop your
+// own 1024x1024 PNG there to brand the app. Otherwise a plain flat purple
+// square is written as a neutral placeholder so the build always works.
 
 import { deflateSync } from "node:zlib";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SIZE = 1024;
-const PURPLE = [145, 71, 255];
-const WHITE = [255, 255, 255];
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const out = join(root, "src-tauri", "icon-source.png");
+const custom = join(root, "app-icon.png");
 
-// --- drawing -------------------------------------------------------------
+mkdirSync(join(root, "src-tauri"), { recursive: true });
+
+if (existsSync(custom)) {
+  copyFileSync(custom, out);
+  console.log(`using custom icon: ${custom}`);
+  process.exit(0);
+}
+
+// --- flat placeholder ------------------------------------------------------
+
+const SIZE = 1024;
+const COLOR = [145, 71, 255]; // #9147ff
+const cornerRadius = SIZE * 0.22;
+const inset = SIZE * 0.04;
 
 const px = new Uint8Array(SIZE * SIZE * 4);
 const center = SIZE / 2;
-const cornerRadius = SIZE * 0.22;
-const squareInset = SIZE * 0.04;
-
-const ringOuter = SIZE * 0.30;
-const ringInner = SIZE * 0.21;
-const dotRadius = SIZE * 0.10;
-
-function roundedSquareDistance(x, y) {
-  // Signed distance to the rounded square (negative = inside).
-  const half = SIZE / 2 - squareInset;
-  const dx = Math.abs(x - center) - (half - cornerRadius);
-  const dy = Math.abs(y - center) - (half - cornerRadius);
-  const ax = Math.max(dx, 0);
-  const ay = Math.max(dy, 0);
-  return Math.hypot(ax, ay) + Math.min(Math.max(dx, dy), 0) - cornerRadius;
-}
-
-function coverage(signedDistance) {
-  // 1px anti-aliased edge.
-  return Math.min(1, Math.max(0, 0.5 - signedDistance));
-}
 
 for (let y = 0; y < SIZE; y++) {
   for (let x = 0; x < SIZE; x++) {
-    const cx = x + 0.5;
-    const cy = y + 0.5;
-
-    const squareAlpha = coverage(roundedSquareDistance(cx, cy));
-    if (squareAlpha === 0) continue;
-
-    const r = Math.hypot(cx - center, cy - center);
-    const ringAlpha = coverage(r - ringOuter) * coverage(ringInner - r);
-    const dotAlpha = coverage(r - dotRadius);
-    const markAlpha = Math.max(ringAlpha, dotAlpha);
-
-    const color = [
-      PURPLE[0] + (WHITE[0] - PURPLE[0]) * markAlpha,
-      PURPLE[1] + (WHITE[1] - PURPLE[1]) * markAlpha,
-      PURPLE[2] + (WHITE[2] - PURPLE[2]) * markAlpha,
-    ];
+    // Signed distance to the rounded square, for a 1px anti-aliased edge.
+    const half = SIZE / 2 - inset;
+    const dx = Math.abs(x + 0.5 - center) - (half - cornerRadius);
+    const dy = Math.abs(y + 0.5 - center) - (half - cornerRadius);
+    const dist =
+      Math.hypot(Math.max(dx, 0), Math.max(dy, 0)) +
+      Math.min(Math.max(dx, dy), 0) -
+      cornerRadius;
+    const alpha = Math.min(1, Math.max(0, 0.5 - dist));
+    if (alpha === 0) continue;
 
     const i = (y * SIZE + x) * 4;
-    px[i] = Math.round(color[0]);
-    px[i + 1] = Math.round(color[1]);
-    px[i + 2] = Math.round(color[2]);
-    px[i + 3] = Math.round(squareAlpha * 255);
+    px[i] = COLOR[0];
+    px[i + 1] = COLOR[1];
+    px[i + 2] = COLOR[2];
+    px[i + 3] = Math.round(alpha * 255);
   }
 }
 
-// --- PNG encoding --------------------------------------------------------
+// --- PNG encoding ----------------------------------------------------------
 
 const crcTable = new Uint32Array(256).map((_, n) => {
   let c = n;
@@ -79,12 +67,12 @@ function crc32(buf) {
 }
 
 function chunk(type, data) {
-  const out = Buffer.alloc(12 + data.length);
-  out.writeUInt32BE(data.length, 0);
-  out.write(type, 4, "ascii");
-  data.copy(out, 8);
-  out.writeUInt32BE(crc32(out.subarray(4, 8 + data.length)), 8 + data.length);
-  return out;
+  const buf = Buffer.alloc(12 + data.length);
+  buf.writeUInt32BE(data.length, 0);
+  buf.write(type, 4, "ascii");
+  data.copy(buf, 8);
+  buf.writeUInt32BE(crc32(buf.subarray(4, 8 + data.length)), 8 + data.length);
+  return buf;
 }
 
 const ihdr = Buffer.alloc(13);
@@ -93,7 +81,6 @@ ihdr.writeUInt32BE(SIZE, 4);
 ihdr[8] = 8; // bit depth
 ihdr[9] = 6; // color type: RGBA
 
-// Raw scanlines, each prefixed with filter byte 0.
 const raw = Buffer.alloc(SIZE * (SIZE * 4 + 1));
 for (let y = 0; y < SIZE; y++) {
   Buffer.from(px.subarray(y * SIZE * 4, (y + 1) * SIZE * 4)).copy(raw, y * (SIZE * 4 + 1) + 1);
@@ -106,8 +93,5 @@ const png = Buffer.concat([
   chunk("IEND", Buffer.alloc(0)),
 ]);
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-mkdirSync(join(root, "src-tauri"), { recursive: true });
-const out = join(root, "src-tauri", "icon-source.png");
 writeFileSync(out, png);
-console.log(`wrote ${out} (${png.length} bytes)`);
+console.log(`wrote flat placeholder: ${out} (${png.length} bytes)`);

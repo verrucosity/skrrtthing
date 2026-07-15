@@ -8,9 +8,12 @@ import { StatusDot, statusLabels } from "../components/ui/StatusDot";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useConnectionStore } from "../stores/connectionStore";
 import { useGoalStore } from "../stores/goalStore";
+import { useTextOutputStore } from "../stores/textOutputStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
 import { openExternal } from "../lib/external";
+import { DEFAULT_TEMPLATE, renderGoalText } from "../lib/textOutput";
+import { formatTime } from "../lib/format";
 
 type TestResult = { ok: boolean; message: string } | null;
 
@@ -20,6 +23,7 @@ export function Settings() {
       <div className="space-y-4">
         <TwitchSection />
         <StreamlabsSection />
+        <TextOutputSection />
         <GeneralSection />
         <DangerSection />
       </div>
@@ -188,6 +192,62 @@ function StreamlabsSection() {
         <TestMessage result={result} />
         {streamlabs.status === "error" && streamlabs.error && (
           <p className="text-xs text-red-400">{streamlabs.error}</p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function TextOutputSection() {
+  const enabled = useSettingsStore((s) => s.textOutputEnabled);
+  const path = useSettingsStore((s) => s.textOutputPath);
+  const template = useSettingsStore((s) => s.textOutputTemplate);
+  const update = useSettingsStore((s) => s.update);
+  const points = useGoalStore((s) => s.points);
+  const lastWriteAt = useTextOutputStore((s) => s.lastWriteAt);
+  const writeError = useTextOutputStore((s) => s.error);
+
+  return (
+    <Card
+      title="OBS Text Output"
+      action={
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
+          Enabled
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => update({ textOutputEnabled: e.target.checked })}
+            className="h-4 w-4 accent-[#9147ff]"
+          />
+        </label>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-xs text-zinc-500">
+          Writes the goal line to a plain text file whenever it changes (and every few
+          seconds as a safety net). In OBS, add a <span className="text-zinc-400">Text (GDI+)</span>{" "}
+          source, tick <span className="text-zinc-400">Read from file</span>, point it at this
+          file and style the font there.
+        </p>
+        <Input
+          label="Output file"
+          value={path}
+          onChange={(e) => update({ textOutputPath: e.target.value })}
+          placeholder="C:\Users\you\Documents\goaldock.txt"
+        />
+        <Input
+          label="Format"
+          value={template}
+          onChange={(e) => update({ textOutputTemplate: e.target.value })}
+          placeholder={DEFAULT_TEMPLATE}
+          hint="Placeholders: {current}, {target}, {stars}, {remaining}"
+        />
+        <p className="text-xs text-zinc-500">
+          Preview: <span className="font-mono text-zinc-300">{renderGoalText(points, template)}</span>
+        </p>
+        {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
+        {enabled && !writeError && lastWriteAt && (
+          <p className="text-xs text-emerald-400">Last written {formatTime(lastWriteAt)}</p>
         )}
       </div>
     </Card>

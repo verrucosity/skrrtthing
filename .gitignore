@@ -5,6 +5,7 @@ dist
 src-tauri/target
 src-tauri/gen/schemas
 src-tauri/icon-source.png
+app-icon.png
 
 # Editors / OS
 .vscode/*

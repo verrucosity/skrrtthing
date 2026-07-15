@@ -62,6 +62,10 @@ export interface Settings {
   twitchToken: string;
   streamlabsToken: string;
   autoConnect: boolean;
+  /** Write the goal line to a text file for an OBS Text source. */
+  textOutputEnabled: boolean;
+  textOutputPath: string;
+  textOutputTemplate: string;
 }
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";

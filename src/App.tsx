@@ -5,6 +5,7 @@ import { EventLog } from "./pages/EventLog";
 import { Statistics } from "./pages/Statistics";
 import { Settings } from "./pages/Settings";
 import { useAppInit } from "./hooks/useAppInit";
+import { useTextOutput } from "./hooks/useTextOutput";
 import type { PageId } from "./pages";
 
 const pages: Record<PageId, () => JSX.Element> = {
@@ -16,6 +17,7 @@ const pages: Record<PageId, () => JSX.Element> = {
 
 export default function App() {
   const ready = useAppInit();
+  useTextOutput();
   const [page, setPage] = useState<PageId>("dashboard");
 
   if (!ready) {
