@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 import { Page } from "../components/layout/Page";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -9,7 +9,10 @@ import { useSettingsStore } from "../stores/settingsStore";
 import { useConnectionStore } from "../stores/connectionStore";
 import { useGoalStore } from "../stores/goalStore";
 import { useTextOutputStore } from "../stores/textOutputStore";
+import { useUpdateStore } from "../stores/updateStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
+import { getLatestRelease, isNewerVersion } from "../services/updates";
+import { Modal } from "../components/ui/Modal";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
 import { openExternal } from "../lib/external";
 import {
@@ -21,9 +24,39 @@ import {
 import { formatTime } from "../lib/format";
 import { isInSaturdayWindow } from "../lib/weeklyWindow";
 
+const APP_VERSION = "0.1.0";
+
 type TestResult = { ok: boolean; message: string } | null;
 
 export function Settings() {
+  const updateAvailable = useUpdateStore((s) => s.available);
+  const updateChecking = useUpdateStore((s) => s.checking);
+  const updateError = useUpdateStore((s) => s.error);
+  const setUpdateAvailable = useUpdateStore((s) => s.setAvailable);
+  const setUpdateChecking = useUpdateStore((s) => s.setChecking);
+  const setUpdateError = useUpdateStore((s) => s.setError);
+  const clearUpdate = useUpdateStore((s) => s.clear);
+
+  async function checkForUpdates() {
+    setUpdateChecking(true);
+    try {
+      const release = await getLatestRelease();
+      if (!release) {
+        setUpdateError("Could not reach GitHub");
+        return;
+      }
+      if (isNewerVersion(APP_VERSION, release.tagName)) {
+        setUpdateAvailable(release);
+      } else {
+        setUpdateError("You're already on the latest version");
+      }
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : "Update check failed");
+    } finally {
+      setUpdateChecking(false);
+    }
+  }
+
   return (
     <Page title="Settings" description="Credentials stay on this machine, in the app's data folder.">
       <div className="space-y-4">
@@ -32,8 +65,43 @@ export function Settings() {
         <WeeklyOutputSection />
         <SaturdayOutputSection />
         <GeneralSection />
+        <UpdateSection
+          checking={updateChecking}
+          error={updateError}
+          onCheck={checkForUpdates}
+        />
         <DangerSection />
       </div>
+
+      <Modal
+        open={!!updateAvailable}
+        title="Update Available"
+        onClose={clearUpdate}
+        actions={[
+          {
+            label: "Download",
+            onClick: () => {
+              if (updateAvailable) openExternal(updateAvailable.downloadUrl);
+            },
+            variant: "primary",
+          },
+        ]}
+      >
+        <div className="space-y-3">
+          <p>
+            Version <span className="font-mono font-semibold">{updateAvailable?.tagName}</span> is
+            available.
+          </p>
+          <p className="text-xs text-zinc-400">
+            Download the new .msi installer and run it to update.
+          </p>
+          {updateAvailable?.body && (
+            <div className="max-h-48 overflow-y-auto rounded bg-raised p-2 text-xs text-zinc-300">
+              {updateAvailable.body}
+            </div>
+          )}
+        </div>
+      </Modal>
     </Page>
   );
 }
@@ -327,6 +395,32 @@ function SaturdayOutputSection() {
         {enabled && !writeError && lastWriteAt && (
           <p className="text-xs text-emerald-400">Last written {formatTime(lastWriteAt)}</p>
         )}
+      </div>
+    </Card>
+  );
+}
+
+function UpdateSection({
+  checking,
+  error,
+  onCheck,
+}: {
+  checking: boolean;
+  error: string | null;
+  onCheck(): void;
+}) {
+  return (
+    <Card
+      title="Updates"
+      action={<span className="text-xs text-zinc-500">v{APP_VERSION}</span>}
+    >
+      <div className="space-y-3">
+        <p className="text-xs text-zinc-500">Check for new versions on GitHub.</p>
+        <Button onClick={onCheck} busy={checking} variant="secondary" className="w-full">
+          <Download size={14} />
+          Check for Updates
+        </Button>
+        {error && <p className="text-xs text-amber-400">{error}</p>}
       </div>
     </Card>
   );
