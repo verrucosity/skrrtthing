@@ -316,7 +316,7 @@ function SaturdayOutputSection() {
           value={template}
           onChange={(e) => update({ saturdayOutputTemplate: e.target.value })}
           placeholder={DEFAULT_SATURDAY_TEMPLATE}
-          hint="Placeholders: {current}, {target}"
+          hint="Placeholders: {current}, {target}, {stars}"
         />
         <p className="text-xs text-zinc-500">
           Preview: <span className="font-mono text-zinc-300">{renderSaturdayText(points, template)}</span>

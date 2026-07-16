@@ -37,6 +37,11 @@ export function saturdayRight(): number {
   return SATURDAY_STEP;
 }
 
+/** Stars for completed weekly goals (one per 57-point goal). */
+export function weeklyStars(points: number): string {
+  return "*".repeat(completedWeeklyGoals(points));
+}
+
 /** Progress through current weekly goal (0..57). */
 export function weeklyProgress(points: number): { done: number; ratio: number } {
   const done = points - completedWeeklyGoals(points) * WEEKLY_STEP;
