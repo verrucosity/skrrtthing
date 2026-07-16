@@ -62,10 +62,14 @@ export interface Settings {
   twitchToken: string;
   streamlabsToken: string;
   autoConnect: boolean;
-  /** Write the goal line to a text file for an OBS Text source. */
-  textOutputEnabled: boolean;
-  textOutputPath: string;
-  textOutputTemplate: string;
+  /** Weekly goal (57, 114, 171...) text file output. */
+  weeklyOutputEnabled: boolean;
+  weeklyOutputPath: string;
+  weeklyOutputTemplate: string;
+  /** Saturday goal (19, 38, 57...) text file output (Sat 8pm - Sun 7:59pm PT). */
+  saturdayOutputEnabled: boolean;
+  saturdayOutputPath: string;
+  saturdayOutputTemplate: string;
 }
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "GoalDock",
+  "productName": "skrrt goal thingy",
   "version": "0.1.0",
-  "identifier": "app.goaldock.desktop",
+  "identifier": "app.skrrt-goal-thingy.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "GoalDock",
+        "title": "skrrt goal thingy",
         "width": 1120,
         "height": 740,
         "minWidth": 880,

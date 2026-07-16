@@ -1,18 +1,39 @@
 import { create } from "zustand";
 
-/** Write status for the OBS text file, shown in Settings. */
+/** Track write status for both weekly and Saturday OBS text files. */
 interface TextOutputStore {
-  lastWriteAt: string | null;
-  error: string | null;
+  weeklyLastWriteAt: string | null;
+  weeklyError: string | null;
+  saturdayLastWriteAt: string | null;
+  saturdayError: string | null;
   recordSuccess(): void;
-  recordError(message: string): void;
+  recordWeeklyError(message: string): void;
+  recordSaturdayError(message: string): void;
   clear(): void;
 }
 
 export const useTextOutputStore = create<TextOutputStore>((set) => ({
-  lastWriteAt: null,
-  error: null,
-  recordSuccess: () => set({ lastWriteAt: new Date().toISOString(), error: null }),
-  recordError: (message) => set({ error: message }),
-  clear: () => set({ lastWriteAt: null, error: null }),
+  weeklyLastWriteAt: null,
+  weeklyError: null,
+  saturdayLastWriteAt: null,
+  saturdayError: null,
+
+  recordSuccess: () =>
+    set({
+      weeklyLastWriteAt: new Date().toISOString(),
+      weeklyError: null,
+      saturdayLastWriteAt: new Date().toISOString(),
+      saturdayError: null,
+    }),
+
+  recordWeeklyError: (message) => set({ weeklyError: message }),
+  recordSaturdayError: (message) => set({ saturdayError: message }),
+
+  clear: () =>
+    set({
+      weeklyLastWriteAt: null,
+      weeklyError: null,
+      saturdayLastWriteAt: null,
+      saturdayError: null,
+    }),
 }));

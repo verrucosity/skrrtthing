@@ -12,8 +12,14 @@ import { useTextOutputStore } from "../stores/textOutputStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
 import { openExternal } from "../lib/external";
-import { DEFAULT_TEMPLATE, renderGoalText } from "../lib/textOutput";
+import {
+  DEFAULT_WEEKLY_TEMPLATE,
+  DEFAULT_SATURDAY_TEMPLATE,
+  renderWeeklyText,
+  renderSaturdayText,
+} from "../lib/textOutput";
 import { formatTime } from "../lib/format";
+import { isInSaturdayWindow } from "../lib/weeklyWindow";
 
 type TestResult = { ok: boolean; message: string } | null;
 
@@ -23,7 +29,8 @@ export function Settings() {
       <div className="space-y-4">
         <TwitchSection />
         <StreamlabsSection />
-        <TextOutputSection />
+        <WeeklyOutputSection />
+        <SaturdayOutputSection />
         <GeneralSection />
         <DangerSection />
       </div>
@@ -79,14 +86,23 @@ function TwitchSection() {
       const info = await validateToken(token.trim());
       const missing = missingScopes(info);
       if (missing.length > 0) {
-        setResult({ ok: false, message: `Valid token for ${info.login}, but missing scopes: ${missing.join(", ")}` });
+        setResult({
+          ok: false,
+          message: `Valid token for ${info.login}, but missing scopes: ${missing.join(", ")}`,
+        });
       } else {
         const hours = Math.floor(info.expires_in / 3600);
         const expiry = info.expires_in === 0 ? "never expires" : `expires in ~${hours}h`;
-        setResult({ ok: true, message: `Connected as ${info.login} — all scopes present, token ${expiry}.` });
+        setResult({
+          ok: true,
+          message: `Connected as ${info.login} — all scopes present, token ${expiry}.`,
+        });
       }
     } catch (err) {
-      setResult({ ok: false, message: err instanceof Error ? err.message : "Validation failed" });
+      setResult({
+        ok: false,
+        message: err instanceof Error ? err.message : "Validation failed",
+      });
     } finally {
       setTesting(false);
     }
@@ -105,7 +121,9 @@ function TwitchSection() {
         />
         <p className="text-xs text-zinc-500">
           Need a token? Create an app in the{" "}
-          <HelpLink href="https://dev.twitch.tv/console/apps">Twitch developer console</HelpLink>{" "}
+          <HelpLink href="https://dev.twitch.tv/console/apps">
+            Twitch developer console
+          </HelpLink>{" "}
           and use an OAuth flow, or use a generator like{" "}
           <HelpLink href="https://twitchtokengenerator.com">twitchtokengenerator.com</HelpLink>{" "}
           with the scopes <code className="text-zinc-400">bits:read</code> and{" "}
@@ -151,7 +169,10 @@ function StreamlabsSection() {
       await testStreamlabsToken(token.trim());
       setResult({ ok: true, message: "Socket connection succeeded." });
     } catch (err) {
-      setResult({ ok: false, message: err instanceof Error ? err.message : "Connection failed" });
+      setResult({
+        ok: false,
+        message: err instanceof Error ? err.message : "Connection failed",
+      });
     } finally {
       setTesting(false);
     }
@@ -198,25 +219,26 @@ function StreamlabsSection() {
   );
 }
 
-function TextOutputSection() {
-  const enabled = useSettingsStore((s) => s.textOutputEnabled);
-  const path = useSettingsStore((s) => s.textOutputPath);
-  const template = useSettingsStore((s) => s.textOutputTemplate);
+function WeeklyOutputSection() {
+  const enabled = useSettingsStore((s) => s.weeklyOutputEnabled);
+  const path = useSettingsStore((s) => s.weeklyOutputPath);
+  const template = useSettingsStore((s) => s.weeklyOutputTemplate);
   const update = useSettingsStore((s) => s.update);
   const points = useGoalStore((s) => s.points);
-  const lastWriteAt = useTextOutputStore((s) => s.lastWriteAt);
-  const writeError = useTextOutputStore((s) => s.error);
+  const bitsRemainder = useGoalStore((s) => s.bitsRemainder);
+  const lastWriteAt = useTextOutputStore((s) => s.weeklyLastWriteAt);
+  const writeError = useTextOutputStore((s) => s.weeklyError);
 
   return (
     <Card
-      title="OBS Text Output"
+      title="Weekly Goal Output"
       action={
         <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
           Enabled
           <input
             type="checkbox"
             checked={enabled}
-            onChange={(e) => update({ textOutputEnabled: e.target.checked })}
+            onChange={(e) => update({ weeklyOutputEnabled: e.target.checked })}
             className="h-4 w-4 accent-[#9147ff]"
           />
         </label>
@@ -224,26 +246,82 @@ function TextOutputSection() {
     >
       <div className="space-y-4">
         <p className="text-xs text-zinc-500">
-          Writes the goal line to a plain text file whenever it changes (and every few
-          seconds as a safety net). In OBS, add a <span className="text-zinc-400">Text (GDI+)</span>{" "}
-          source, tick <span className="text-zinc-400">Read from file</span>, point it at this
-          file and style the font there.
+          Writes the weekly goal (57, 114, 171...) to a text file whenever it changes. In OBS, add
+          a <span className="text-zinc-400">Text (GDI+)</span> source, enable{" "}
+          <span className="text-zinc-400">Read from file</span>, and point it at this file.
         </p>
         <Input
           label="Output file"
           value={path}
-          onChange={(e) => update({ textOutputPath: e.target.value })}
-          placeholder="C:\Users\you\Documents\goaldock.txt"
+          onChange={(e) => update({ weeklyOutputPath: e.target.value })}
+          placeholder="C:\Users\you\Documents\skrrt-weekly.txt"
         />
         <Input
           label="Format"
           value={template}
-          onChange={(e) => update({ textOutputTemplate: e.target.value })}
-          placeholder={DEFAULT_TEMPLATE}
-          hint="Placeholders: {current}, {target}, {stars}, {remaining}"
+          onChange={(e) => update({ weeklyOutputTemplate: e.target.value })}
+          placeholder={DEFAULT_WEEKLY_TEMPLATE}
+          hint="Placeholders: {current}, {current_decimal}, {target}, {remaining}"
         />
         <p className="text-xs text-zinc-500">
-          Preview: <span className="font-mono text-zinc-300">{renderGoalText(points, template)}</span>
+          Preview: <span className="font-mono text-zinc-300">{renderWeeklyText(points, bitsRemainder, template)}</span>
+        </p>
+        {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
+        {enabled && !writeError && lastWriteAt && (
+          <p className="text-xs text-emerald-400">Last written {formatTime(lastWriteAt)}</p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function SaturdayOutputSection() {
+  const enabled = useSettingsStore((s) => s.saturdayOutputEnabled);
+  const path = useSettingsStore((s) => s.saturdayOutputPath);
+  const template = useSettingsStore((s) => s.saturdayOutputTemplate);
+  const update = useSettingsStore((s) => s.update);
+  const points = useGoalStore((s) => s.points);
+  const lastWriteAt = useTextOutputStore((s) => s.saturdayLastWriteAt);
+  const writeError = useTextOutputStore((s) => s.saturdayError);
+  const inWindow = isInSaturdayWindow();
+
+  return (
+    <Card
+      title="Saturday Goal Output"
+      action={
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
+          Enabled
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => update({ saturdayOutputEnabled: e.target.checked })}
+            className="h-4 w-4 accent-[#9147ff]"
+          />
+        </label>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-xs text-zinc-500">
+          Writes the Saturday goal (19/19) only during Saturday 8pm - Sunday 7:59pm PT. Outside
+          that window, the file is not updated.
+        </p>
+        <Input
+          label="Output file"
+          value={path}
+          onChange={(e) => update({ saturdayOutputPath: e.target.value })}
+          placeholder="C:\Users\you\Documents\skrrt-saturday.txt"
+        />
+        <Input
+          label="Format"
+          value={template}
+          onChange={(e) => update({ saturdayOutputTemplate: e.target.value })}
+          placeholder={DEFAULT_SATURDAY_TEMPLATE}
+          hint="Placeholders: {current}, {target}"
+        />
+        <p className="text-xs text-zinc-500">
+          Preview: <span className="font-mono text-zinc-300">{renderSaturdayText(points, template)}</span>
+          {inWindow && <span className="ml-2 text-emerald-400">(active now)</span>}
+          {!inWindow && <span className="ml-2 text-zinc-600">(inactive until Sat 8pm PT)</span>}
         </p>
         {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
         {enabled && !writeError && lastWriteAt && (

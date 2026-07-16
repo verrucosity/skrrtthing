@@ -1,15 +1,18 @@
 import { create } from "zustand";
 import type { Settings } from "../types";
 import { loadSettings, saveSettings } from "../lib/storage";
-import { DEFAULT_TEMPLATE } from "../lib/textOutput";
+import { DEFAULT_WEEKLY_TEMPLATE, DEFAULT_SATURDAY_TEMPLATE } from "../lib/textOutput";
 
 const defaults: Settings = {
   twitchToken: "",
   streamlabsToken: "",
   autoConnect: true,
-  textOutputEnabled: false,
-  textOutputPath: "",
-  textOutputTemplate: DEFAULT_TEMPLATE,
+  weeklyOutputEnabled: false,
+  weeklyOutputPath: "",
+  weeklyOutputTemplate: DEFAULT_WEEKLY_TEMPLATE,
+  saturdayOutputEnabled: false,
+  saturdayOutputPath: "",
+  saturdayOutputTemplate: DEFAULT_SATURDAY_TEMPLATE,
 };
 
 interface SettingsStore extends Settings {
@@ -34,17 +37,23 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       twitchToken,
       streamlabsToken,
       autoConnect,
-      textOutputEnabled,
-      textOutputPath,
-      textOutputTemplate,
+      weeklyOutputEnabled,
+      weeklyOutputPath,
+      weeklyOutputTemplate,
+      saturdayOutputEnabled,
+      saturdayOutputPath,
+      saturdayOutputTemplate,
     } = get();
     void saveSettings({
       twitchToken,
       streamlabsToken,
       autoConnect,
-      textOutputEnabled,
-      textOutputPath,
-      textOutputTemplate,
+      weeklyOutputEnabled,
+      weeklyOutputPath,
+      weeklyOutputTemplate,
+      saturdayOutputEnabled,
+      saturdayOutputPath,
+      saturdayOutputTemplate,
     } satisfies Settings);
   },
 }));

@@ -26,7 +26,7 @@ export function Sidebar({ page, onNavigate }: SidebarProps) {
         <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent/15 text-accent">
           <Target size={17} />
         </span>
-        <span className="text-sm font-semibold tracking-tight text-zinc-100">GoalDock</span>
+        <span className="text-sm font-semibold tracking-tight text-zinc-100">skrrt</span>
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 px-2">

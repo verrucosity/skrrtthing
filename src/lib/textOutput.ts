@@ -1,19 +1,39 @@
 import { invoke } from "@tauri-apps/api/core";
-import { currentTarget, stars } from "./goal";
+import { BITS_PER_POINT } from "./goal";
+import { weeklyTarget, saturdayLeft, SATURDAY_STEP } from "./weeklyGoal";
 import { inTauri } from "./env";
 
-export const DEFAULT_TEMPLATE = "{current} / {target} {stars}";
+export const DEFAULT_WEEKLY_TEMPLATE = "{current} / {target}";
+export const DEFAULT_SATURDAY_TEMPLATE = "{current} / {target}";
 
 /**
- * Render the goal line written to the OBS text file. Supported placeholders:
- * {current}, {target}, {stars}, {remaining}.
+ * Render the weekly goal text. Placeholders: {current}, {current_decimal},
+ * {target}, {remaining}.
  */
-export function renderGoalText(points: number, template: string): string {
-  return (template || DEFAULT_TEMPLATE)
+export function renderWeeklyText(
+  points: number,
+  bitsRemainder: number,
+  template: string,
+): string {
+  const target = weeklyTarget(points);
+  const currentDecimal = points + bitsRemainder / BITS_PER_POINT;
+  return (template || DEFAULT_WEEKLY_TEMPLATE)
     .replaceAll("{current}", String(points))
-    .replaceAll("{target}", String(currentTarget(points)))
-    .replaceAll("{stars}", stars(points))
-    .replaceAll("{remaining}", String(currentTarget(points) - points))
+    .replaceAll("{current_decimal}", currentDecimal.toFixed(2))
+    .replaceAll("{target}", String(target))
+    .replaceAll("{remaining}", String(target - points))
+    .trimEnd();
+}
+
+/**
+ * Render the Saturday goal text (only active Sat 8pm - Sun 7:59pm PT).
+ * Placeholders: {current}, {target}.
+ */
+export function renderSaturdayText(points: number, template: string): string {
+  const current = saturdayLeft(points);
+  return (template || DEFAULT_SATURDAY_TEMPLATE)
+    .replaceAll("{current}", current)
+    .replaceAll("{target}", String(SATURDAY_STEP))
     .trimEnd();
 }
 
