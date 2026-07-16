@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { BITS_PER_POINT } from "./goal";
-import { weeklyTarget, saturdayLeft, SATURDAY_STEP, weeklyStars } from "./weeklyGoal";
+import { weeklyTarget, saturdayLeft, saturdayTarget, weeklyStars } from "./weeklyGoal";
 import { inTauri } from "./env";
 
 export const DEFAULT_WEEKLY_TEMPLATE = "{current} / {target}";
@@ -31,10 +31,11 @@ export function renderWeeklyText(
  */
 export function renderSaturdayText(points: number, template: string): string {
   const current = saturdayLeft(points);
+  const target = saturdayTarget(points);
   const stars = weeklyStars(points);
   return (template || DEFAULT_SATURDAY_TEMPLATE)
     .replaceAll("{current}", current)
-    .replaceAll("{target}", String(SATURDAY_STEP))
+    .replaceAll("{target}", String(target))
     .replaceAll("{stars}", stars)
     .trimEnd();
 }

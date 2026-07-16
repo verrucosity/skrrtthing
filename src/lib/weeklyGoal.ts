@@ -32,9 +32,11 @@ export function saturdayLeft(points: number): string {
   return value.toFixed(2);
 }
 
-/** Saturday counter right side: always 19 */
-export function saturdayRight(): number {
-  return SATURDAY_STEP;
+/** Saturday target (19, 38, 57, 76...) based on current Saturday progress. */
+export function saturdayTarget(points: number): number {
+  const left = parseFloat(saturdayLeft(points));
+  const goalsCompleted = Math.floor(left / SATURDAY_STEP);
+  return (goalsCompleted + 1) * SATURDAY_STEP;
 }
 
 /** Stars for completed weekly goals (one per 57-point goal). */
