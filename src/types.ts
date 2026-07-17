@@ -1,7 +1,7 @@
 /** Twitch sub tiers as they appear in EventSub payloads. Prime reports as "1000". */
 export type SubTier = "1000" | "2000" | "3000";
 
-export type ContributionKind = "bits" | "sub" | "gift-sub" | "donation";
+export type ContributionKind = "bits" | "sub" | "gift-sub" | "donation" | "manual";
 
 export interface LogEntry {
   id: string;

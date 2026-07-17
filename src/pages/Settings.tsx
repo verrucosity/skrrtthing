@@ -37,6 +37,7 @@ export function Settings() {
       <div className="space-y-4">
         <TwitchSection />
         <StreamlabsSection />
+        <StartingPointSection />
         <WeeklyOutputSection />
         <SaturdayOutputSection />
         <GeneralSection />
@@ -257,6 +258,54 @@ function StreamlabsSection() {
         {streamlabs.status === "error" && streamlabs.error && (
           <p className="text-xs text-red-400">{streamlabs.error}</p>
         )}
+      </div>
+    </Card>
+  );
+}
+
+function StartingPointSection() {
+  const points = useGoalStore((s) => s.points);
+  const setPoints = useGoalStore((s) => s.setPoints);
+  const [value, setValue] = useState(String(points));
+  const [saved, setSaved] = useState(false);
+
+  const parsed = Number(value);
+  const valid = value.trim() !== "" && Number.isFinite(parsed) && parsed >= 0;
+
+  function apply() {
+    if (!valid) return;
+    setPoints(parsed);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <Card title="Starting Point">
+      <div className="space-y-4">
+        <p className="text-xs text-zinc-500">
+          Already have a goal in progress on Twitch? Set the counter to match instead of starting
+          from zero. This overrides the lifetime counter directly — it doesn't affect your bits,
+          subs or donation totals, and it's logged as a manual adjustment.
+        </p>
+        <div className="flex items-end gap-2">
+          <Input
+            label="Current points"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="0"
+            inputMode="numeric"
+          />
+          <Button onClick={apply} disabled={!valid || parsed === points} variant="primary">
+            Set
+          </Button>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Currently at <span className="font-mono text-zinc-300">{points}</span> points.
+        </p>
+        {saved && <p className="text-xs text-emerald-400">Counter updated.</p>}
       </div>
     </Card>
   );

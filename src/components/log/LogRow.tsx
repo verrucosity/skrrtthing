@@ -1,4 +1,4 @@
-import { Coins, Gift, Heart, UserPlus } from "lucide-react";
+import { Coins, Gift, Heart, Sliders, UserPlus } from "lucide-react";
 import type { LogEntry } from "../../types";
 import { formatDateTime } from "../../lib/format";
 
@@ -7,10 +7,12 @@ const icons = {
   sub: UserPlus,
   "gift-sub": Gift,
   donation: Heart,
+  manual: Sliders,
 } as const;
 
 export function LogRow({ entry, compact = false }: { entry: LogEntry; compact?: boolean }) {
   const Icon = icons[entry.kind];
+  const sign = entry.points > 0 ? "+" : entry.points < 0 ? "" : "";
   return (
     <div className="flex items-center gap-3 py-2">
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-raised text-zinc-400">
@@ -32,7 +34,8 @@ export function LogRow({ entry, compact = false }: { entry: LogEntry; compact?: 
             : "w-10 shrink-0 text-right text-sm tabular-nums text-zinc-600"
         }
       >
-        +{entry.points}
+        {sign}
+        {entry.points}
       </span>
     </div>
   );

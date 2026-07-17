@@ -50,6 +50,7 @@ interface GoalStore extends GoalData {
   rolloverIfNeeded(now?: Date): void;
   clearLog(): void;
   resetEverything(): void;
+  setPoints(points: number): void;
 }
 
 export const useGoalStore = create<GoalStore>((set, get) => {
@@ -237,6 +238,37 @@ export const useGoalStore = create<GoalStore>((set, get) => {
 
     resetEverything() {
       set(emptyData());
+      persist();
+    },
+
+    /**
+     * Manually set the lifetime counter to a specific value, e.g. when
+     * first linking a channel that already has an existing goal in
+     * progress. Logs the change so it's visible in the Event Log, but
+     * doesn't touch stats (bits/subs/donations totals) since this isn't a
+     * real contribution — just a starting point correction.
+     */
+    setPoints(points) {
+      if (!Number.isFinite(points) || points < 0) return;
+      const rounded = Math.floor(points);
+      set((state) => {
+        const delta = rounded - state.points;
+        return {
+          points: rounded,
+          week: { ...state.week, points: state.week.points + delta },
+          log: [
+            {
+              id: crypto.randomUUID(),
+              at: new Date().toISOString(),
+              kind: "manual" as const,
+              label: "Manual adjustment",
+              detail: `Set to ${rounded}`,
+              points: delta,
+            },
+            ...state.log,
+          ].slice(0, LOG_LIMIT),
+        };
+      });
       persist();
     },
   };
