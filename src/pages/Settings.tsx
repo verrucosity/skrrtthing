@@ -11,7 +11,6 @@ import { useGoalStore } from "../stores/goalStore";
 import { useTextOutputStore } from "../stores/textOutputStore";
 import { useUpdateStore } from "../stores/updateStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
-import { getLatestRelease, isNewerVersion } from "../services/updates";
 import { Modal } from "../components/ui/Modal";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
 import { openExternal } from "../lib/external";
@@ -23,8 +22,7 @@ import {
 } from "../lib/textOutput";
 import { formatTime } from "../lib/format";
 import { isInSaturdayWindow } from "../lib/weeklyWindow";
-
-const APP_VERSION = "0.1.0";
+import { APP_VERSION, checkForUpdatesVerbose } from "../hooks/useUpdateChecker";
 
 type TestResult = { ok: boolean; message: string } | null;
 
@@ -32,30 +30,7 @@ export function Settings() {
   const updateAvailable = useUpdateStore((s) => s.available);
   const updateChecking = useUpdateStore((s) => s.checking);
   const updateError = useUpdateStore((s) => s.error);
-  const setUpdateAvailable = useUpdateStore((s) => s.setAvailable);
-  const setUpdateChecking = useUpdateStore((s) => s.setChecking);
-  const setUpdateError = useUpdateStore((s) => s.setError);
   const clearUpdate = useUpdateStore((s) => s.clear);
-
-  async function checkForUpdates() {
-    setUpdateChecking(true);
-    try {
-      const release = await getLatestRelease();
-      if (!release) {
-        setUpdateError("Could not reach GitHub");
-        return;
-      }
-      if (isNewerVersion(APP_VERSION, release.tagName)) {
-        setUpdateAvailable(release);
-      } else {
-        setUpdateError("You're already on the latest version");
-      }
-    } catch (err) {
-      setUpdateError(err instanceof Error ? err.message : "Update check failed");
-    } finally {
-      setUpdateChecking(false);
-    }
-  }
 
   return (
     <Page title="Settings" description="Credentials stay on this machine, in the app's data folder.">
@@ -68,7 +43,7 @@ export function Settings() {
         <UpdateSection
           checking={updateChecking}
           error={updateError}
-          onCheck={checkForUpdates}
+          onCheck={() => void checkForUpdatesVerbose()}
         />
         <DangerSection />
       </div>
