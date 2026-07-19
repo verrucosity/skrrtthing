@@ -42,6 +42,7 @@ export function Settings() {
         <WeeklyOutputSection />
         <SaturdayOutputSection />
         <GeneralSection />
+        <TestEventsSection />
         <UpdateSection
           checking={updateChecking}
           error={updateError}
@@ -484,6 +485,51 @@ function GeneralSection() {
             Run Setup Wizard
           </Button>
         </div>
+      </div>
+    </Card>
+  );
+}
+
+function TestEventsSection() {
+  const addBits = useGoalStore((s) => s.addBits);
+  const addSub = useGoalStore((s) => s.addSub);
+  const addGiftSubs = useGoalStore((s) => s.addGiftSubs);
+  const addDonation = useGoalStore((s) => s.addDonation);
+  const [fired, setFired] = useState<string | null>(null);
+
+  function fire(label: string, action: () => void) {
+    action();
+    setFired(label);
+    setTimeout(() => setFired(null), 1500);
+  }
+
+  const tests: Array<{ label: string; onClick: () => void }> = [
+    { label: "600 Bits (+1)", onClick: () => addBits(600, { user: "test_user" }) },
+    { label: "Tier 1 Sub (+1)", onClick: () => addSub("1000", { user: "test_user" }) },
+    { label: "Tier 2 Sub (+2)", onClick: () => addSub("2000", { user: "test_user" }) },
+    { label: "Tier 3 Sub (+6)", onClick: () => addSub("3000", { user: "test_user" }) },
+    {
+      label: "5x Gifted Tier 1 (+5)",
+      onClick: () => addGiftSubs("1000", 5, { user: "test_user" }),
+    },
+    { label: "$6 Donation (+1)", onClick: () => addDonation(600, { user: "test_user" }) },
+  ];
+
+  return (
+    <Card title="Test Events">
+      <div className="space-y-3">
+        <p className="text-xs text-zinc-500">
+          Fire fake contributions to verify the counter, Event Log and OBS text files update
+          correctly — no real bits, subs or money involved.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {tests.map((t) => (
+            <Button key={t.label} variant="secondary" onClick={() => fire(t.label, t.onClick)}>
+              {t.label}
+            </Button>
+          ))}
+        </div>
+        {fired && <p className="text-xs text-emerald-400">Sent: {fired}</p>}
       </div>
     </Card>
   );
