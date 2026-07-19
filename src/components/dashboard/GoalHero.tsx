@@ -9,13 +9,11 @@ import {
   weeklyTarget,
 } from "../../lib/weeklyGoal";
 import { isInSaturdayWindow } from "../../lib/weeklyWindow";
-import { BITS_PER_POINT } from "../../lib/goal";
-import { formatNumber } from "../../lib/format";
+import { formatPoints } from "../../lib/format";
 import { ProgressBar } from "../ui/ProgressBar";
 
 export function GoalHero() {
   const points = useGoalStore((s) => s.points);
-  const bitsRemainder = useGoalStore((s) => s.bitsRemainder);
   const now = useNow();
 
   const target = weeklyTarget(points);
@@ -30,9 +28,9 @@ export function GoalHero() {
       </p>
       <div className="flex items-end justify-center gap-3">
         <span className="text-6xl font-bold tabular-nums tracking-tight text-zinc-50">
-          {formatNumber(points)}
+          {formatPoints(points)}
           <span className="mx-3 text-zinc-600">/</span>
-          {formatNumber(target)}
+          {formatPoints(target)}
         </span>
         {completed > 0 && (
           <span
@@ -43,19 +41,14 @@ export function GoalHero() {
           </span>
         )}
       </div>
-      {bitsRemainder > 0 && (
-        <p className="mt-1 text-center text-xs text-zinc-600">
-          +{bitsRemainder} / {BITS_PER_POINT} bits banked toward the next point
-        </p>
-      )}
 
       <div className="mx-auto mt-6 max-w-xl">
         <ProgressBar ratio={ratio} />
         <div className="mt-2 flex justify-between text-xs text-zinc-500">
           <span>
-            {done} / 57 toward goal #{completed + 1}
+            {formatPoints(done)} / 57 toward goal #{completed + 1}
           </span>
-          <span>{57 - done} to go</span>
+          <span>{formatPoints(57 - done)} to go</span>
         </div>
       </div>
 

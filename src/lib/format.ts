@@ -2,6 +2,17 @@ export function formatNumber(n: number): string {
   return n.toLocaleString("en-US");
 }
 
+/** Up to 2 decimal places, trailing zeros trimmed: 21 -> "21", 0.5 -> "0.5", 7.17 -> "7.17" */
+export function formatPoints(n: number): string {
+  const rounded = Math.round(n * 100) / 100;
+  return rounded.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+
+/** Always shows exactly 2 decimal places: 21 -> "21.00", 7.5 -> "7.50" */
+export function formatPointsFixed(n: number): string {
+  return (Math.round(n * 100) / 100).toFixed(2);
+}
+
 export function formatUsd(cents: number): string {
   return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

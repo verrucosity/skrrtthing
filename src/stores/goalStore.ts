@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import type { GoalData, LogEntry, SubTier } from "../types";
-import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, bankedPoints } from "../lib/goal";
+import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, roundPoints } from "../lib/goal";
 import { completedWeeklyGoals } from "../lib/weeklyGoal";
 import { weeklyKey } from "../lib/weeklyWindow";
-import { formatUsd } from "../lib/format";
+import { formatUsd, formatPoints } from "../lib/format";
 import { loadData, saveData } from "../lib/storage";
 
 const LOG_LIMIT = 500;
@@ -12,8 +12,6 @@ const HISTORY_LIMIT = 104; // two years of weeks
 function emptyData(now = new Date()): GoalData {
   return {
     points: 0,
-    bitsRemainder: 0,
-    donationRemainderCents: 0,
     stats: {
       totalBits: 0,
       totalSubs: 0,
@@ -65,11 +63,11 @@ export const useGoalStore = create<GoalStore>((set, get) => {
       const changes = patch(state);
       return {
         ...changes,
-        points: state.points + points,
+        points: roundPoints(state.points + points),
         week: {
           ...state.week,
           ...changes.week,
-          points: state.week.points + points,
+          points: roundPoints(state.week.points + points),
         },
         log: [
           { id: crypto.randomUUID(), at: new Date().toISOString(), points, ...entry },
@@ -84,8 +82,6 @@ export const useGoalStore = create<GoalStore>((set, get) => {
     const s = get();
     const data: GoalData = {
       points: s.points,
-      bitsRemainder: s.bitsRemainder,
-      donationRemainderCents: s.donationRemainderCents,
       stats: s.stats,
       week: s.week,
       history: s.history,
@@ -107,26 +103,20 @@ export const useGoalStore = create<GoalStore>((set, get) => {
 
     addBits(bits, meta = {}) {
       if (bits <= 0) return;
-      const state = get();
-      const banked = bankedPoints(state.bitsRemainder, bits, BITS_PER_POINT);
-      const detailParts = [
-        meta.user,
-        meta.via,
-        banked.remainder > 0 ? `${banked.remainder}/${BITS_PER_POINT} banked` : null,
-      ].filter(Boolean);
+      const points = roundPoints(bits / BITS_PER_POINT);
+      const detailParts = [meta.user, meta.via].filter(Boolean);
       apply(
-        banked.points,
+        points,
         {
           kind: "bits",
           label: `${bits.toLocaleString("en-US")} Bits`,
           detail: detailParts.join(" · ") || undefined,
         },
         (s) => ({
-          bitsRemainder: banked.remainder,
           stats: {
             ...s.stats,
             totalBits: s.stats.totalBits + bits,
-            pointsFromBits: s.stats.pointsFromBits + banked.points,
+            pointsFromBits: roundPoints(s.stats.pointsFromBits + points),
           },
           week: { ...s.week, bits: s.week.bits + bits },
         }),
@@ -147,7 +137,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
           stats: {
             ...s.stats,
             totalSubs: s.stats.totalSubs + 1,
-            pointsFromSubs: s.stats.pointsFromSubs + points,
+            pointsFromSubs: roundPoints(s.stats.pointsFromSubs + points),
           },
           week: { ...s.week, subs: s.week.subs + 1 },
         }),
@@ -169,7 +159,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
             ...s.stats,
             totalSubs: s.stats.totalSubs + count,
             totalGiftSubs: s.stats.totalGiftSubs + count,
-            pointsFromSubs: s.stats.pointsFromSubs + points,
+            pointsFromSubs: roundPoints(s.stats.pointsFromSubs + points),
           },
           week: { ...s.week, subs: s.week.subs + count },
         }),
@@ -178,26 +168,21 @@ export const useGoalStore = create<GoalStore>((set, get) => {
 
     addDonation(cents, meta = {}) {
       if (cents <= 0) return;
-      const state = get();
-      const banked = bankedPoints(state.donationRemainderCents, cents, CENTS_PER_POINT);
-      const detailParts = [
-        meta.user,
-        banked.remainder > 0 ? `${formatUsd(banked.remainder)} banked` : null,
-      ].filter(Boolean);
+      const points = roundPoints(cents / CENTS_PER_POINT);
+      const detailParts = [meta.user].filter(Boolean);
       apply(
-        banked.points,
+        points,
         {
           kind: "donation",
           label: `Donation ${meta.formatted ?? formatUsd(cents)}`,
           detail: detailParts.join(" · ") || undefined,
         },
         (s) => ({
-          donationRemainderCents: banked.remainder,
           stats: {
             ...s.stats,
             totalDonations: s.stats.totalDonations + 1,
             totalDonationCents: s.stats.totalDonationCents + cents,
-            pointsFromDonations: s.stats.pointsFromDonations + banked.points,
+            pointsFromDonations: roundPoints(s.stats.pointsFromDonations + points),
           },
           week: { ...s.week, donationCents: s.week.donationCents + cents },
         }),
@@ -248,23 +233,24 @@ export const useGoalStore = create<GoalStore>((set, get) => {
      * first linking a channel that already has an existing goal in
      * progress. Logs the change so it's visible in the Event Log, but
      * doesn't touch stats (bits/subs/donations totals) since this isn't a
-     * real contribution — just a starting point correction.
+     * real contribution — just a starting point correction. Accepts
+     * decimals since bits can leave the counter at a fractional value.
      */
     setPoints(points) {
       if (!Number.isFinite(points) || points < 0) return;
-      const rounded = Math.floor(points);
+      const rounded = roundPoints(points);
       set((state) => {
-        const delta = rounded - state.points;
+        const delta = roundPoints(rounded - state.points);
         return {
           points: rounded,
-          week: { ...state.week, points: state.week.points + delta },
+          week: { ...state.week, points: roundPoints(state.week.points + delta) },
           log: [
             {
               id: crypto.randomUUID(),
               at: new Date().toISOString(),
               kind: "manual" as const,
               label: "Manual adjustment",
-              detail: `Set to ${rounded}`,
+              detail: `Set to ${formatPoints(rounded)}`,
               points: delta,
             },
             ...state.log,

@@ -4,7 +4,7 @@ import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { useGoalStore } from "../stores/goalStore";
 import { completedWeeklyGoals } from "../lib/weeklyGoal";
-import { formatDate, formatNumber, formatUsd } from "../lib/format";
+import { formatDate, formatNumber, formatPoints, formatUsd } from "../lib/format";
 
 export function Statistics() {
   const stats = useGoalStore((s) => s.stats);
@@ -25,7 +25,7 @@ export function Statistics() {
           value={formatUsd(stats.totalDonationCents)}
           sub={`${formatNumber(stats.totalDonations)} donation${stats.totalDonations === 1 ? "" : "s"}`}
         />
-        <StatCard label="Lifetime Contributions" value={formatNumber(points)} sub="points" />
+        <StatCard label="Lifetime Contributions" value={formatPoints(points)} sub="points" />
         <StatCard
           label="Weekly Goals Completed"
           value={formatNumber(completedWeeklyGoals(points))}
@@ -53,7 +53,9 @@ export function Statistics() {
               {history.map((week) => (
                 <tr key={week.start}>
                   <td className="py-2 text-zinc-300">{formatDate(week.start)}</td>
-                  <td className="py-2 text-right tabular-nums text-zinc-200">+{week.points}</td>
+                  <td className="py-2 text-right tabular-nums text-zinc-200">
+                    +{formatPoints(week.points)}
+                  </td>
                   <td className="py-2 text-right tabular-nums text-zinc-200">
                     {week.goalsCompleted || "—"}
                   </td>

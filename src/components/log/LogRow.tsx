@@ -1,6 +1,6 @@
 import { Coins, Gift, Heart, Sliders, UserPlus } from "lucide-react";
 import type { LogEntry } from "../../types";
-import { formatDateTime } from "../../lib/format";
+import { formatDateTime, formatPoints } from "../../lib/format";
 
 const icons = {
   bits: Coins,
@@ -30,12 +30,12 @@ export function LogRow({ entry, compact = false }: { entry: LogEntry; compact?: 
       <span
         className={
           entry.points > 0
-            ? "w-10 shrink-0 text-right text-sm font-semibold tabular-nums text-accent-hover"
-            : "w-10 shrink-0 text-right text-sm tabular-nums text-zinc-600"
+            ? "w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-accent-hover"
+            : "w-14 shrink-0 text-right text-sm tabular-nums text-zinc-600"
         }
       >
         {sign}
-        {entry.points}
+        {formatPoints(entry.points)}
       </span>
     </div>
   );

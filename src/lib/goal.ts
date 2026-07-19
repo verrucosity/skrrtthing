@@ -10,15 +10,10 @@ export const SUB_POINTS: Record<SubTier, number> = {
 };
 
 /**
- * Fold an amount into a running remainder and return whole points earned.
- * Used for bits (600 = +1) and donation cents (600 = +1) so small
- * contributions accumulate instead of being discarded.
+ * Round to 2 decimal places. Every point value gets rounded through this
+ * before being stored, so floating point error from repeated bits/600 or
+ * cents/600 divisions never accumulates into a visible drift over time.
  */
-export function bankedPoints(
-  remainder: number,
-  amount: number,
-  perPoint: number,
-): { points: number; remainder: number } {
-  const total = remainder + amount;
-  return { points: Math.floor(total / perPoint), remainder: total % perPoint };
+export function roundPoints(n: number): number {
+  return Math.round(n * 100) / 100;
 }

@@ -1,27 +1,25 @@
 import { invoke } from "@tauri-apps/api/core";
-import { BITS_PER_POINT } from "./goal";
 import { weeklyTarget, saturdayLeft, saturdayTarget, weeklyStars } from "./weeklyGoal";
+import { formatPoints, formatPointsFixed } from "./format";
 import { inTauri } from "./env";
 
 export const DEFAULT_WEEKLY_TEMPLATE = "{current} / {target}";
 export const DEFAULT_SATURDAY_TEMPLATE = "{current} / {target} {stars}";
 
 /**
- * Render the weekly goal text. Placeholders: {current}, {current_decimal},
- * {target}, {remaining}.
+ * Render the weekly goal text. `points` already carries fractional bits and
+ * cents directly (see goalStore), so {current} always reflects every
+ * contribution exactly, down to the cent/bit.
+ *
+ * Placeholders: {current}, {current_decimal}, {target}, {remaining}.
  */
-export function renderWeeklyText(
-  points: number,
-  bitsRemainder: number,
-  template: string,
-): string {
+export function renderWeeklyText(points: number, template: string): string {
   const target = weeklyTarget(points);
-  const currentDecimal = points + bitsRemainder / BITS_PER_POINT;
   return (template || DEFAULT_WEEKLY_TEMPLATE)
-    .replaceAll("{current}", String(points))
-    .replaceAll("{current_decimal}", currentDecimal.toFixed(2))
+    .replaceAll("{current}", formatPoints(points))
+    .replaceAll("{current_decimal}", formatPointsFixed(points))
     .replaceAll("{target}", String(target))
-    .replaceAll("{remaining}", String(target - points))
+    .replaceAll("{remaining}", formatPoints(target - points))
     .trimEnd();
 }
 

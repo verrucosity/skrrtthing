@@ -14,7 +14,7 @@ async function sync(): Promise<void> {
 
   // Write weekly file
   if (settings.weeklyOutputEnabled && settings.weeklyOutputPath.trim()) {
-    const text = renderWeeklyText(state.points, state.bitsRemainder, settings.weeklyOutputTemplate);
+    const text = renderWeeklyText(state.points, settings.weeklyOutputTemplate);
     try {
       await writeTextFile(settings.weeklyOutputPath.trim(), text);
     } catch (err) {
@@ -47,9 +47,7 @@ async function sync(): Promise<void> {
 export function useTextOutput(): void {
   useEffect(() => {
     const unsubGoal = useGoalStore.subscribe((state, prev) => {
-      if (state.points !== prev.points || state.bitsRemainder !== prev.bitsRemainder) {
-        void sync();
-      }
+      if (state.points !== prev.points) void sync();
     });
     const unsubSettings = useSettingsStore.subscribe((state, prev) => {
       if (

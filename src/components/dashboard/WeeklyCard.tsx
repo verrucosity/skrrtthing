@@ -2,7 +2,7 @@ import { useGoalStore } from "../../stores/goalStore";
 import { useNow } from "../../hooks/useNow";
 import { completedWeeklyGoals } from "../../lib/weeklyGoal";
 import { nextWeeklyStart } from "../../lib/weeklyWindow";
-import { formatDate, formatUntil } from "../../lib/format";
+import { formatDate, formatPoints, formatUntil } from "../../lib/format";
 import { Card } from "../ui/Card";
 
 export function WeeklyCard() {
@@ -15,7 +15,7 @@ export function WeeklyCard() {
   return (
     <Card title="This Week">
       <dl className="space-y-2.5 text-sm">
-        <Row label="Contributions" value={`+${week.points}`} strong />
+        <Row label="Contributions" value={`+${formatPoints(week.points)}`} strong />
         <Row
           label="Weekly goals completed"
           value={goalsThisWeek > 0 ? `${goalsThisWeek} 🎉` : "—"}

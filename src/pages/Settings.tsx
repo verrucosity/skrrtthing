@@ -319,7 +319,6 @@ function WeeklyOutputSection() {
   const template = useSettingsStore((s) => s.weeklyOutputTemplate);
   const update = useSettingsStore((s) => s.update);
   const points = useGoalStore((s) => s.points);
-  const bitsRemainder = useGoalStore((s) => s.bitsRemainder);
   const lastWriteAt = useTextOutputStore((s) => s.weeklyLastWriteAt);
   const writeError = useTextOutputStore((s) => s.weeklyError);
 
@@ -358,7 +357,7 @@ function WeeklyOutputSection() {
           hint="Placeholders: {current}, {current_decimal}, {target}, {remaining}"
         />
         <p className="text-xs text-zinc-500">
-          Preview: <span className="font-mono text-zinc-300">{renderWeeklyText(points, bitsRemainder, template)}</span>
+          Preview: <span className="font-mono text-zinc-300">{renderWeeklyText(points, template)}</span>
         </p>
         {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
         {enabled && !writeError && lastWriteAt && (
@@ -495,7 +494,6 @@ function TestEventsSection() {
   const addSub = useGoalStore((s) => s.addSub);
   const addGiftSubs = useGoalStore((s) => s.addGiftSubs);
   const addDonation = useGoalStore((s) => s.addDonation);
-  const bitsRemainder = useGoalStore((s) => s.bitsRemainder);
   const [fired, setFired] = useState<string | null>(null);
 
   function fire(label: string, action: () => void) {
@@ -528,9 +526,8 @@ function TestEventsSection() {
           correctly — no real bits, subs or money involved.
         </p>
         <p className="text-xs text-zinc-500">
-          Bits under 600 don't move the whole-number counter by themselves — they bank until they
-          add up to a full point, same as real cheers. Currently banked:{" "}
-          <span className="font-mono text-zinc-300">{bitsRemainder} / 600</span> bits.
+          Every bit counts immediately — 100 bits shows up as +0.17 right away, no waiting for a
+          full point.
         </p>
         <div className="grid grid-cols-2 gap-2">
           {tests.map((t) => (
