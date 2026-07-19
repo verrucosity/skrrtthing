@@ -495,6 +495,7 @@ function TestEventsSection() {
   const addSub = useGoalStore((s) => s.addSub);
   const addGiftSubs = useGoalStore((s) => s.addGiftSubs);
   const addDonation = useGoalStore((s) => s.addDonation);
+  const bitsRemainder = useGoalStore((s) => s.bitsRemainder);
   const [fired, setFired] = useState<string | null>(null);
 
   function fire(label: string, action: () => void) {
@@ -525,6 +526,11 @@ function TestEventsSection() {
         <p className="text-xs text-zinc-500">
           Fire fake contributions to verify the counter, Event Log and OBS text files update
           correctly — no real bits, subs or money involved.
+        </p>
+        <p className="text-xs text-zinc-500">
+          Bits under 600 don't move the whole-number counter by themselves — they bank until they
+          add up to a full point, same as real cheers. Currently banked:{" "}
+          <span className="font-mono text-zinc-300">{bitsRemainder} / 600</span> bits.
         </p>
         <div className="grid grid-cols-2 gap-2">
           {tests.map((t) => (

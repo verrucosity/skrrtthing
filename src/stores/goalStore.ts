@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import type { GoalData, LogEntry, SubTier } from "../types";
-import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, bankedPoints, completedGoals } from "../lib/goal";
-import { weekKey } from "../lib/week";
+import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, bankedPoints } from "../lib/goal";
+import { completedWeeklyGoals } from "../lib/weeklyGoal";
+import { weeklyKey } from "../lib/weeklyWindow";
 import { formatUsd } from "../lib/format";
 import { loadData, saveData } from "../lib/storage";
 
@@ -24,7 +25,7 @@ function emptyData(now = new Date()): GoalData {
       pointsFromDonations: 0,
     },
     week: {
-      start: weekKey(now),
+      start: weeklyKey(now),
       startPoints: 0,
       points: 0,
       bits: 0,
@@ -205,7 +206,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
 
     rolloverIfNeeded(now = new Date()) {
       const state = get();
-      const key = weekKey(now);
+      const key = weeklyKey(now);
       if (state.week.start === key) return;
 
       // Archive the finished week (skip completely empty ones) and start fresh.
@@ -214,7 +215,8 @@ export const useGoalStore = create<GoalStore>((set, get) => {
         history.unshift({
           start: state.week.start,
           points: state.week.points,
-          goalsCompleted: completedGoals(state.points) - completedGoals(state.week.startPoints),
+          goalsCompleted:
+            completedWeeklyGoals(state.points) - completedWeeklyGoals(state.week.startPoints),
         });
       }
       set({

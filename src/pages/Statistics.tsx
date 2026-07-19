@@ -3,7 +3,7 @@ import { Page } from "../components/layout/Page";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { useGoalStore } from "../stores/goalStore";
-import { completedGoals } from "../lib/goal";
+import { completedWeeklyGoals } from "../lib/weeklyGoal";
 import { formatDate, formatNumber, formatUsd } from "../lib/format";
 
 export function Statistics() {
@@ -27,9 +27,9 @@ export function Statistics() {
         />
         <StatCard label="Lifetime Contributions" value={formatNumber(points)} sub="points" />
         <StatCard
-          label="Goals Completed"
-          value={formatNumber(completedGoals(points))}
-          sub="groups of 19"
+          label="Weekly Goals Completed"
+          value={formatNumber(completedWeeklyGoals(points))}
+          sub="groups of 57"
         />
       </div>
 
@@ -38,7 +38,7 @@ export function Statistics() {
           <EmptyState
             icon={History}
             title="No completed weeks yet"
-            hint="Each Saturday the current week is archived here."
+            hint="Each Sunday at 8pm PT the current week is archived here."
           />
         ) : (
           <table className="w-full text-sm">

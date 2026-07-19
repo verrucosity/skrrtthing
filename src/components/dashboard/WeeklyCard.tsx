@@ -1,7 +1,7 @@
 import { useGoalStore } from "../../stores/goalStore";
 import { useNow } from "../../hooks/useNow";
-import { completedGoals } from "../../lib/goal";
-import { nextReset } from "../../lib/week";
+import { completedWeeklyGoals } from "../../lib/weeklyGoal";
+import { nextWeeklyStart } from "../../lib/weeklyWindow";
 import { formatDate, formatUntil } from "../../lib/format";
 import { Card } from "../ui/Card";
 
@@ -10,18 +10,18 @@ export function WeeklyCard() {
   const points = useGoalStore((s) => s.points);
   const now = useNow();
 
-  const goalsThisWeek = completedGoals(points) - completedGoals(week.startPoints);
+  const goalsThisWeek = completedWeeklyGoals(points) - completedWeeklyGoals(week.startPoints);
 
   return (
     <Card title="This Week">
       <dl className="space-y-2.5 text-sm">
         <Row label="Contributions" value={`+${week.points}`} strong />
         <Row
-          label="Goals completed"
+          label="Weekly goals completed"
           value={goalsThisWeek > 0 ? `${goalsThisWeek} 🎉` : "—"}
         />
         <Row label="Week started" value={formatDate(week.start)} />
-        <Row label="Resets in" value={formatUntil(nextReset(now), now)} />
+        <Row label="Resets in" value={formatUntil(nextWeeklyStart(now), now)} />
       </dl>
     </Card>
   );
