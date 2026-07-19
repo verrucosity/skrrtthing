@@ -4,6 +4,7 @@ import { loadSettings, saveSettings } from "../lib/storage";
 import { DEFAULT_WEEKLY_TEMPLATE, DEFAULT_SATURDAY_TEMPLATE } from "../lib/textOutput";
 
 const defaults: Settings = {
+  onboardingComplete: false,
   twitchToken: "",
   streamlabsToken: "",
   autoConnect: true,
@@ -34,6 +35,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   update(patch) {
     set(patch);
     const {
+      onboardingComplete,
       twitchToken,
       streamlabsToken,
       autoConnect,
@@ -45,6 +47,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       saturdayOutputTemplate,
     } = get();
     void saveSettings({
+      onboardingComplete,
       twitchToken,
       streamlabsToken,
       autoConnect,

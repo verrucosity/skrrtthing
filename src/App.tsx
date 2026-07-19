@@ -4,9 +4,12 @@ import { Dashboard } from "./pages/Dashboard";
 import { EventLog } from "./pages/EventLog";
 import { Statistics } from "./pages/Statistics";
 import { Settings } from "./pages/Settings";
+import { Wizard } from "./pages/Wizard";
 import { useAppInit } from "./hooks/useAppInit";
 import { useTextOutput } from "./hooks/useTextOutput";
 import { useUpdateChecker } from "./hooks/useUpdateChecker";
+import { useSettingsStore } from "./stores/settingsStore";
+import { useWizardStore } from "./stores/wizardStore";
 import type { PageId } from "./pages";
 
 const pages: Record<PageId, () => JSX.Element> = {
@@ -21,9 +24,24 @@ export default function App() {
   useTextOutput();
   useUpdateChecker();
   const [page, setPage] = useState<PageId>("dashboard");
+  const onboardingComplete = useSettingsStore((s) => s.onboardingComplete);
+  const updateSettings = useSettingsStore((s) => s.update);
+  const wizardOpen = useWizardStore((s) => s.open);
+  const hideWizard = useWizardStore((s) => s.hide);
 
   if (!ready) {
     return <div className="flex h-screen items-center justify-center bg-ink" />;
+  }
+
+  if (!onboardingComplete || wizardOpen) {
+    return (
+      <Wizard
+        onFinish={() => {
+          updateSettings({ onboardingComplete: true });
+          hideWizard();
+        }}
+      />
+    );
   }
 
   const Current = pages[page];

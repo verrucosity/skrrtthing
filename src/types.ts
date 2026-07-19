@@ -59,6 +59,8 @@ export interface GoalData {
 }
 
 export interface Settings {
+  /** False until the first-launch setup wizard has been completed or skipped. */
+  onboardingComplete: boolean;
   twitchToken: string;
   streamlabsToken: string;
   autoConnect: boolean;

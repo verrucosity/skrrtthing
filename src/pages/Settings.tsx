@@ -10,6 +10,7 @@ import { useConnectionStore } from "../stores/connectionStore";
 import { useGoalStore } from "../stores/goalStore";
 import { useTextOutputStore } from "../stores/textOutputStore";
 import { useUpdateStore } from "../stores/updateStore";
+import { useWizardStore } from "../stores/wizardStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
 import { Modal } from "../components/ui/Modal";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
@@ -453,23 +454,37 @@ function UpdateSection({
 function GeneralSection() {
   const autoConnect = useSettingsStore((s) => s.autoConnect);
   const update = useSettingsStore((s) => s.update);
+  const showWizard = useWizardStore((s) => s.show);
 
   return (
     <Card title="General">
-      <label className="flex cursor-pointer items-center justify-between text-sm">
-        <span>
-          <span className="block text-zinc-200">Connect on launch</span>
-          <span className="block text-xs text-zinc-500">
-            Reconnect to Twitch and Streamlabs automatically when the app starts.
+      <div className="space-y-4">
+        <label className="flex cursor-pointer items-center justify-between text-sm">
+          <span>
+            <span className="block text-zinc-200">Connect on launch</span>
+            <span className="block text-xs text-zinc-500">
+              Reconnect to Twitch and Streamlabs automatically when the app starts.
+            </span>
           </span>
-        </span>
-        <input
-          type="checkbox"
-          checked={autoConnect}
-          onChange={(e) => update({ autoConnect: e.target.checked })}
-          className="h-4 w-4 accent-[#9147ff]"
-        />
-      </label>
+          <input
+            type="checkbox"
+            checked={autoConnect}
+            onChange={(e) => update({ autoConnect: e.target.checked })}
+            className="h-4 w-4 accent-[#9147ff]"
+          />
+        </label>
+        <div className="flex items-center justify-between border-t border-edge pt-4">
+          <span>
+            <span className="block text-sm text-zinc-200">Setup wizard</span>
+            <span className="block text-xs text-zinc-500">
+              Re-run the guided setup for Twitch, Streamlabs and OBS.
+            </span>
+          </span>
+          <Button variant="secondary" onClick={showWizard}>
+            Run Setup Wizard
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 }
