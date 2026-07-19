@@ -22,7 +22,7 @@ export function EventLog() {
   return (
     <Page
       title="Event Log"
-      description={`${log.length} entr${log.length === 1 ? "y" : "ies"} · newest first`}
+      description={`${log.length} entr${log.length === 1 ? "y" : "ies"}, newest first`}
       action={
         log.length > 0 && (
           <Button
@@ -45,8 +45,8 @@ export function EventLog() {
         {log.length === 0 ? (
           <EmptyState
             icon={ScrollText}
-            title="The log is empty"
-            hint="Every bit cheer, sub, gift and donation is recorded here with its point value."
+            title="Nothing here yet"
+            hint="Every cheer, sub, gift and donation gets logged here along with its point value."
           />
         ) : (
           <div className="divide-y divide-edge/60">

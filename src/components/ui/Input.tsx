@@ -5,7 +5,7 @@ import clsx from "clsx";
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   hint?: string;
-  /** Masks the value and adds a reveal toggle — for tokens and keys. */
+  /** Masks the value and adds a reveal toggle, for tokens and keys. */
   secret?: boolean;
 }
 

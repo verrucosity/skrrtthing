@@ -233,7 +233,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
      * first linking a channel that already has an existing goal in
      * progress. Logs the change so it's visible in the Event Log, but
      * doesn't touch stats (bits/subs/donations totals) since this isn't a
-     * real contribution — just a starting point correction. Accepts
+     * real contribution, just a starting point correction. Accepts
      * decimals since bits can leave the counter at a fractional value.
      */
     setPoints(points) {

@@ -23,7 +23,7 @@ export async function getLatestRelease(): Promise<Release> {
   try {
     res = await fetch(`${GITHUB_API}/${REPO}/releases/latest`);
   } catch {
-    throw new Error("Could not reach GitHub — check your internet connection");
+    throw new Error("Couldn't reach GitHub, check your internet connection");
   }
 
   if (res.status === 404) {

@@ -48,7 +48,7 @@ export interface WeekSummary {
 export interface GoalData {
   /**
    * The lifetime counter, as a running decimal. Every bit and cent counts
-   * immediately toward it — nothing is hidden in a remainder until it
+   * immediately toward it, nothing is hidden in a remainder until it
    * reaches a whole point.
    */
   points: number;

@@ -1,6 +1,6 @@
 // Prepares src-tauri/icon-source.png for `tauri icon` (run via `npm run icon`).
 //
-// If an app-icon.png exists in the repo root, it is used as-is — drop your
+// If an app-icon.png exists in the repo root, it is used as-is, just drop your
 // own 1024x1024 PNG there to brand the app. Otherwise a plain flat purple
 // square is written as a neutral placeholder so the build always works.
 

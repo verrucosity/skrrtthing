@@ -34,7 +34,7 @@ export function Settings() {
   const clearUpdate = useUpdateStore((s) => s.clear);
 
   return (
-    <Page title="Settings" description="Credentials stay on this machine, in the app's data folder.">
+    <Page title="Settings" description="Your credentials stay right here on this machine, in the app's data folder.">
       <div className="space-y-4">
         <TwitchSection />
         <StreamlabsSection />
@@ -71,7 +71,7 @@ export function Settings() {
             available.
           </p>
           <p className="text-xs text-zinc-400">
-            Download the new .msi installer and run it to update.
+            Grab the new .msi installer and run it, that's all it takes to update.
           </p>
           {updateAvailable?.body && (
             <div className="max-h-48 overflow-y-auto rounded bg-raised p-2 text-xs text-zinc-300">
@@ -141,7 +141,7 @@ function TwitchSection() {
         const expiry = info.expires_in === 0 ? "never expires" : `expires in ~${hours}h`;
         setResult({
           ok: true,
-          message: `Connected as ${info.login} — all scopes present, token ${expiry}.`,
+          message: `Connected as ${info.login}, got all the right scopes, token ${expiry}.`,
         });
       }
     } catch (err) {
@@ -163,16 +163,16 @@ function TwitchSection() {
           value={token}
           onChange={(e) => update({ twitchToken: e.target.value })}
           placeholder="Paste a token with bits:read and channel:read:subscriptions"
-          hint="Your channel and client ID are detected from the token automatically."
+          hint="We'll figure out your channel and client ID from the token automatically."
         />
         <p className="text-xs text-zinc-500">
-          Need a token? Create an app in the{" "}
+          Need a token? You can create an app in the{" "}
           <HelpLink href="https://dev.twitch.tv/console/apps">
             Twitch developer console
           </HelpLink>{" "}
-          and use an OAuth flow, or use a generator like{" "}
+          and run an OAuth flow, or just use a generator like{" "}
           <HelpLink href="https://twitchtokengenerator.com">twitchtokengenerator.com</HelpLink>{" "}
-          with the scopes <code className="text-zinc-400">bits:read</code> and{" "}
+          and check the scopes <code className="text-zinc-400">bits:read</code> and{" "}
           <code className="text-zinc-400">channel:read:subscriptions</code>.
         </p>
         <div className="flex items-center gap-2">
@@ -233,14 +233,14 @@ function StreamlabsSection() {
           value={token}
           onChange={(e) => update({ streamlabsToken: e.target.value })}
           placeholder="Paste your Streamlabs socket token"
-          hint="Only needed if you count Streamlabs donations toward the goal."
+          hint="Only needed if you want donations to count toward the goal."
         />
         <p className="text-xs text-zinc-500">
-          Found in the{" "}
+          You'll find it in the{" "}
           <HelpLink href="https://streamlabs.com/dashboard#/settings/api-settings">
             Streamlabs dashboard
-          </HelpLink>{" "}
-          under Settings → API Settings → API Tokens → Socket API Token.
+          </HelpLink>
+          , under Settings, then API Settings, then API Tokens, then Socket API Token.
         </p>
         <div className="flex items-center gap-2">
           {connected ? (
@@ -285,9 +285,9 @@ function StartingPointSection() {
     <Card title="Starting Point">
       <div className="space-y-4">
         <p className="text-xs text-zinc-500">
-          Already have a goal in progress on Twitch? Set the counter to match instead of starting
-          from zero. This overrides the lifetime counter directly — it doesn't affect your bits,
-          subs or donation totals, and it's logged as a manual adjustment.
+          Already have a goal going on Twitch? Set the counter to match instead of starting from
+          zero. This just moves the counter directly, it won't touch your bits, subs or donation
+          totals, and it shows up in the log as a manual adjustment.
         </p>
         <div className="flex items-end gap-2">
           <Input
@@ -305,7 +305,7 @@ function StartingPointSection() {
           </Button>
         </div>
         <p className="text-xs text-zinc-500">
-          Currently at <span className="font-mono text-zinc-300">{points}</span> points.
+          You're currently at <span className="font-mono text-zinc-300">{points}</span> points.
         </p>
         {saved && <p className="text-xs text-emerald-400">Counter updated.</p>}
       </div>
@@ -339,9 +339,9 @@ function WeeklyOutputSection() {
     >
       <div className="space-y-4">
         <p className="text-xs text-zinc-500">
-          Writes the weekly goal (57, 114, 171...) to a text file whenever it changes. In OBS, add
-          a <span className="text-zinc-400">Text (GDI+)</span> source, enable{" "}
-          <span className="text-zinc-400">Read from file</span>, and point it at this file.
+          This writes the weekly goal (57, 114, 171 and so on) to a text file every time it
+          changes. In OBS, add a <span className="text-zinc-400">Text (GDI+)</span> source, turn
+          on <span className="text-zinc-400">Read from file</span>, and point it at this file.
         </p>
         <Input
           label="Output file"
@@ -395,8 +395,8 @@ function SaturdayOutputSection() {
     >
       <div className="space-y-4">
         <p className="text-xs text-zinc-500">
-          Writes the Saturday goal (19/19) only during Saturday 8pm - Sunday 7:59pm PT. Outside
-          that window, the file is not updated.
+          This one only writes during the Saturday 8pm to Sunday 7:59pm PT window. Outside of
+          that, the file just sits there untouched.
         </p>
         <Input
           label="Output file"
@@ -440,7 +440,7 @@ function UpdateSection({
       action={<span className="text-xs text-zinc-500">v{APP_VERSION}</span>}
     >
       <div className="space-y-3">
-        <p className="text-xs text-zinc-500">Check for new versions on GitHub.</p>
+        <p className="text-xs text-zinc-500">This checks GitHub for a newer version.</p>
         <Button onClick={onCheck} busy={checking} variant="secondary" className="w-full">
           <Download size={14} />
           Check for Updates
@@ -463,7 +463,7 @@ function GeneralSection() {
           <span>
             <span className="block text-zinc-200">Connect on launch</span>
             <span className="block text-xs text-zinc-500">
-              Reconnect to Twitch and Streamlabs automatically when the app starts.
+              This reconnects to Twitch and Streamlabs automatically every time the app opens.
             </span>
           </span>
           <input
@@ -477,7 +477,8 @@ function GeneralSection() {
           <span>
             <span className="block text-sm text-zinc-200">Setup wizard</span>
             <span className="block text-xs text-zinc-500">
-              Re-run the guided setup for Twitch, Streamlabs and OBS.
+              Want to go through the guided setup again for Twitch, Streamlabs or OBS? Run it
+              anytime.
             </span>
           </span>
           <Button variant="secondary" onClick={showWizard}>
@@ -522,12 +523,12 @@ function TestEventsSection() {
     <Card title="Test Events">
       <div className="space-y-3">
         <p className="text-xs text-zinc-500">
-          Fire fake contributions to verify the counter, Event Log and OBS text files update
-          correctly — no real bits, subs or money involved.
+          Fire off some fake contributions to check that the counter, Event Log and OBS text
+          files are all updating right. No real bits, subs or money involved.
         </p>
         <p className="text-xs text-zinc-500">
-          Every bit counts immediately — 100 bits shows up as +0.17 right away, no waiting for a
-          full point.
+          Every bit counts right away, so 100 bits shows up as +0.17 immediately, no waiting
+          around for a full point.
         </p>
         <div className="grid grid-cols-2 gap-2">
           {tests.map((t) => (
