@@ -504,6 +504,10 @@ function TestEventsSection() {
   }
 
   const tests: Array<{ label: string; onClick: () => void }> = [
+    { label: "100 Bits (+0.17)", onClick: () => addBits(100, { user: "test_user" }) },
+    { label: "150 Bits (+0.25)", onClick: () => addBits(150, { user: "test_user" }) },
+    { label: "300 Bits (+0.50)", onClick: () => addBits(300, { user: "test_user" }) },
+    { label: "450 Bits (+0.75)", onClick: () => addBits(450, { user: "test_user" }) },
     { label: "600 Bits (+1)", onClick: () => addBits(600, { user: "test_user" }) },
     { label: "Tier 1 Sub (+1)", onClick: () => addSub("1000", { user: "test_user" }) },
     { label: "Tier 2 Sub (+2)", onClick: () => addSub("2000", { user: "test_user" }) },
