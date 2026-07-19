@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://api.twitch.tv https://id.twitch.tv wss://eventsub.wss.twitch.tv https://sockets.streamlabs.com wss://sockets.streamlabs.com"
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://api.twitch.tv https://id.twitch.tv wss://eventsub.wss.twitch.tv https://sockets.streamlabs.com wss://sockets.streamlabs.com https://api.github.com"
     }
   },
   "bundle": {
