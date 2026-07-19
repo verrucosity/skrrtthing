@@ -12,7 +12,7 @@ export function Statistics() {
   const history = useGoalStore((s) => s.history);
 
   return (
-    <Page title="Statistics" description="Lifetime totals across every week.">
+    <Page title="Statistics" description="Everything you've racked up so far, week by week.">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Total Bits" value={formatNumber(stats.totalBits)} />
         <StatCard
@@ -37,8 +37,8 @@ export function Statistics() {
         {history.length === 0 ? (
           <EmptyState
             icon={History}
-            title="No completed weeks yet"
-            hint="Each Sunday at 8pm PT the current week is archived here."
+            title="No weeks finished yet"
+            hint="Every Sunday at 8pm PT, the current week gets saved here."
           />
         ) : (
           <table className="w-full text-sm">
@@ -57,7 +57,7 @@ export function Statistics() {
                     +{formatPoints(week.points)}
                   </td>
                   <td className="py-2 text-right tabular-nums text-zinc-200">
-                    {week.goalsCompleted || "—"}
+                    {week.goalsCompleted || "None"}
                   </td>
                 </tr>
               ))}

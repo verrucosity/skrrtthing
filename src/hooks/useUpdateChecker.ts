@@ -5,7 +5,7 @@ import { getLatestRelease, isNewerVersion } from "../services/updates";
 const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 export const APP_VERSION = "0.1.0";
 
-/** Silent background check — errors are swallowed so a flaky connection doesn't nag the user. */
+/** Silent background check, errors are swallowed so a flaky connection doesn't nag the user. */
 async function checkSilently(): Promise<void> {
   const { setChecking, setAvailable, setError } = useUpdateStore.getState();
   setChecking(true);
@@ -23,7 +23,7 @@ async function checkSilently(): Promise<void> {
   }
 }
 
-/** Manual check from the Settings button — surfaces errors and "up to date" state. */
+/** Manual check from the Settings button, surfaces errors and "up to date" state. */
 export async function checkForUpdatesVerbose(): Promise<void> {
   const { setChecking, setAvailable, setError } = useUpdateStore.getState();
   setChecking(true);

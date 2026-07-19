@@ -5,8 +5,8 @@ import { inTauri } from "./env";
  * Persistence lives in two JSON files in the app data directory
  * (%APPDATA%/app.goaldock.desktop on Windows):
  *
- *   settings.json — credentials and preferences
- *   data.json     — counter, stats, week state, event log
+ *   settings.json: credentials and preferences
+ *   data.json: counter, stats, week state, event log
  *
  * When running the frontend outside Tauri (`npm run dev` in a plain
  * browser) we fall back to localStorage so the UI stays workable.

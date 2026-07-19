@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-/** A read-only value with a one-click copy button — for file paths, URLs, etc. */
+/** A read-only value with a one-click copy button, for file paths, URLs, etc. */
 export function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
 

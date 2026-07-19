@@ -108,7 +108,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <StepShell
       title="Welcome to skrrt"
-      description="This quick setup connects your Twitch and Streamlabs accounts and sets up the OBS overlay files. Takes about 2 minutes."
+      description="This quick setup connects your Twitch and Streamlabs accounts and gets your OBS overlay files ready. Should only take a couple minutes."
       onNext={onNext}
       nextLabel="Get Started"
     >
@@ -160,7 +160,7 @@ function TwitchStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
   return (
     <StepShell
       title="Connect Twitch"
-      description="Paste an access token so skrrt can see bits, subs and gifts as they happen."
+      description="Paste an access token so skrrt can see your bits, subs and gifts as they come in."
       onNext={onNext}
       onBack={onBack}
       nextDisabled={!result?.ok && !!token.trim() === false}
@@ -178,8 +178,9 @@ function TwitchStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
           placeholder="Paste your token here"
         />
         <p className="text-xs text-zinc-500">
-          Get one at <HelpLink href="https://twitchtokengenerator.com">twitchtokengenerator.com</HelpLink> —
-          check the boxes for <code className="text-zinc-400">bits:read</code> and{" "}
+          You can grab one at{" "}
+          <HelpLink href="https://twitchtokengenerator.com">twitchtokengenerator.com</HelpLink>.
+          Check the boxes for <code className="text-zinc-400">bits:read</code> and{" "}
           <code className="text-zinc-400">channel:read:subscriptions</code>, connect your Twitch
           account, then copy the Access Token it gives you.
         </p>
@@ -220,7 +221,7 @@ function StreamlabsStep({ onNext, onBack }: { onNext: () => void; onBack: () => 
   return (
     <StepShell
       title="Connect Streamlabs"
-      description="Optional — only needed if donations should count toward the goal."
+      description="This one's optional, only needed if you want donations to count toward the goal."
       onNext={onNext}
       onBack={onBack}
       skip={{ label: "Skip", onClick: onNext }}
@@ -237,11 +238,11 @@ function StreamlabsStep({ onNext, onBack }: { onNext: () => void; onBack: () => 
           placeholder="Paste your token here"
         />
         <p className="text-xs text-zinc-500">
-          Found in the{" "}
+          You'll find it in the{" "}
           <HelpLink href="https://streamlabs.com/dashboard#/settings/api-settings">
             Streamlabs dashboard
-          </HelpLink>{" "}
-          under Settings → API Settings → API Tokens → Socket API Token.
+          </HelpLink>
+          , under Settings, then API Settings, then API Tokens, then Socket API Token.
         </p>
         <Button onClick={() => void testAndConnect()} busy={testing} disabled={!token.trim()}>
           Test & Connect
@@ -272,7 +273,7 @@ function StartingPointStep({ onNext, onBack }: { onNext: () => void; onBack: () 
   return (
     <StepShell
       title="Starting Point"
-      description="Already have a goal in progress? Enter the current point count. Otherwise leave it at 0."
+      description="Already have a goal going? Type in the current point count. If not, just leave it at 0."
       onNext={applyAndNext}
       onBack={onBack}
       nextDisabled={!valid}
@@ -310,7 +311,7 @@ function ObsStep({ onNext, onBack }: { onNext: () => void; onBack: () => void })
   return (
     <StepShell
       title="OBS Text Files"
-      description="skrrt writes the goal numbers to two text files. Point an OBS Text source at each one to show them on stream."
+      description="skrrt writes the goal numbers to two text files. Point an OBS Text source at each one and you're good to go."
       onNext={useDefaults}
       onBack={onBack}
       nextLabel="Use These Paths"
@@ -327,9 +328,9 @@ function ObsStep({ onNext, onBack }: { onNext: () => void; onBack: () => void })
         <div className="rounded-md bg-raised p-3 text-xs text-zinc-400">
           <p className="mb-1 font-medium text-zinc-300">In OBS:</p>
           <ol className="list-decimal space-y-0.5 pl-4">
-            <li>Sources → + → Text (GDI+) → New</li>
+            <li>Sources, then +, then Text (GDI+), then New</li>
             <li>Check "Read from file"</li>
-            <li>Browse → paste the path above</li>
+            <li>Click Browse and paste the path above</li>
             <li>Pick your font, size and color</li>
           </ol>
         </div>

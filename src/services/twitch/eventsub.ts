@@ -124,7 +124,7 @@ export class TwitchEventSub {
         break;
       case "revocation": {
         const type = msg.payload.subscription?.type ?? "a subscription";
-        this.fail(`Twitch revoked ${type} — reconnect with a fresh token`);
+        this.fail(`Twitch revoked ${type}, reconnect with a fresh token`);
         break;
       }
     }

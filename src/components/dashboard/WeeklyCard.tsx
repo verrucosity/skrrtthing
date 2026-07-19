@@ -18,7 +18,7 @@ export function WeeklyCard() {
         <Row label="Contributions" value={`+${formatPoints(week.points)}`} strong />
         <Row
           label="Weekly goals completed"
-          value={goalsThisWeek > 0 ? `${goalsThisWeek} 🎉` : "—"}
+          value={goalsThisWeek > 0 ? `${goalsThisWeek} 🎉` : "None yet"}
         />
         <Row label="Week started" value={formatDate(week.start)} />
         <Row label="Resets in" value={formatUntil(nextWeeklyStart(now), now)} />

@@ -27,7 +27,7 @@ export interface StreamlabsCallbacks {
 
 /**
  * Streamlabs pushes alerts over socket.io. The socket token comes from
- * Streamlabs Dashboard → Settings → API Settings → API Tokens.
+ * Streamlabs Dashboard, under Settings, then API Settings, then API Tokens.
  */
 export class StreamlabsSocket {
   private socket: SocketIOClient.Socket | null = null;
@@ -53,7 +53,7 @@ export class StreamlabsSocket {
       // socket.io keeps retrying; only surface the terminal failure below.
     });
     socket.on("reconnect_failed", () => {
-      this.callbacks.onStatus("error", "Could not reach Streamlabs — check the socket token");
+      this.callbacks.onStatus("error", "Couldn't reach Streamlabs, double check the socket token");
       this.disconnectSocket();
     });
     socket.on("event", (data: StreamlabsEvent) => this.handleEvent(data));
@@ -114,7 +114,7 @@ export function testStreamlabsToken(token: string, timeoutMs = 8000): Promise<vo
     socket.on("connect_error", () => {
       clearTimeout(timer);
       socket.close();
-      reject(new Error("Streamlabs refused the connection — check the socket token"));
+      reject(new Error("Streamlabs refused the connection, double check the socket token"));
     });
   });
 }

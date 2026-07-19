@@ -39,7 +39,7 @@ export interface EventSubMessage {
   };
 }
 
-/** channel.bits.use — covers cheers and every power-up (Gigantify, Celebration, effects). */
+/** channel.bits.use, covers cheers and every power-up (Gigantify, Celebration, effects). */
 export interface BitsUseEvent {
   user_name: string | null;
   bits: number;
@@ -47,14 +47,14 @@ export interface BitsUseEvent {
   power_up: { type: string } | null;
 }
 
-/** channel.subscribe — new subs. `is_gift` recipients are counted via the gift event instead. */
+/** channel.subscribe, new subs. `is_gift` recipients are counted via the gift event instead. */
 export interface SubscribeEvent {
   user_name: string;
   tier: SubTier;
   is_gift: boolean;
 }
 
-/** channel.subscription.message — resubs announced in chat. */
+/** channel.subscription.message, resubs announced in chat. */
 export interface ResubEvent {
   user_name: string;
   tier: SubTier;
