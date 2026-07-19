@@ -29,10 +29,6 @@ export async function checkForUpdatesVerbose(): Promise<void> {
   setChecking(true);
   try {
     const release = await getLatestRelease();
-    if (!release) {
-      setError("Could not reach GitHub");
-      return;
-    }
     if (isNewerVersion(APP_VERSION, release.tagName)) {
       setAvailable(release);
     } else {

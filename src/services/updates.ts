@@ -13,31 +13,44 @@ export interface Release {
 const REPO = "verrucosity/skrrtthing";
 const GITHUB_API = "https://api.github.com/repos";
 
-export async function getLatestRelease(): Promise<Release | null> {
+/**
+ * Fetches the latest published GitHub release. Throws a descriptive error
+ * on failure so callers can tell "no release published" apart from
+ * "network/GitHub unreachable" instead of collapsing both into null.
+ */
+export async function getLatestRelease(): Promise<Release> {
+  let res: Response;
   try {
-    const res = await fetch(`${GITHUB_API}/${REPO}/releases/latest`);
-    if (!res.ok) return null;
-
-    const data = (await res.json()) as {
-      tag_name: string;
-      name: string;
-      body: string;
-      assets: Array<{ name: string; browser_download_url: string }>;
-    };
-
-    // Find the .msi installer
-    const msiAsset = data.assets.find((a) => a.name.endsWith(".msi"));
-    if (!msiAsset) return null;
-
-    return {
-      tagName: data.tag_name,
-      name: data.name,
-      body: data.body,
-      downloadUrl: msiAsset.browser_download_url,
-    };
+    res = await fetch(`${GITHUB_API}/${REPO}/releases/latest`);
   } catch {
-    return null;
+    throw new Error("Could not reach GitHub — check your internet connection");
   }
+
+  if (res.status === 404) {
+    throw new Error("No release has been published yet");
+  }
+  if (!res.ok) {
+    throw new Error(`GitHub returned an error (HTTP ${res.status})`);
+  }
+
+  const data = (await res.json()) as {
+    tag_name: string;
+    name: string;
+    body: string;
+    assets: Array<{ name: string; browser_download_url: string }>;
+  };
+
+  const msiAsset = data.assets.find((a) => a.name.endsWith(".msi"));
+  if (!msiAsset) {
+    throw new Error("Latest release has no .msi installer attached");
+  }
+
+  return {
+    tagName: data.tag_name,
+    name: data.name,
+    body: data.body,
+    downloadUrl: msiAsset.browser_download_url,
+  };
 }
 
 /** Parse semantic version for comparison. Returns [major, minor, patch] or null. */
