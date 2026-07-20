@@ -374,6 +374,7 @@ function SaturdayOutputSection() {
   const template = useSettingsStore((s) => s.saturdayOutputTemplate);
   const update = useSettingsStore((s) => s.update);
   const points = useGoalStore((s) => s.points);
+  const saturday = useGoalStore((s) => s.saturday);
   const lastWriteAt = useTextOutputStore((s) => s.saturdayLastWriteAt);
   const writeError = useTextOutputStore((s) => s.saturdayError);
   const inWindow = isInSaturdayWindow();
@@ -412,7 +413,7 @@ function SaturdayOutputSection() {
           hint="Placeholders: {current}, {target}, {stars}"
         />
         <p className="text-xs text-zinc-500">
-          Preview: <span className="font-mono text-zinc-300">{renderSaturdayText(points, template)}</span>
+          Preview: <span className="font-mono text-zinc-300">{renderSaturdayText(saturday.points, points, template)}</span>
           {inWindow && <span className="ml-2 text-emerald-400">(active now)</span>}
           {!inWindow && <span className="ml-2 text-zinc-600">(inactive until Sat 8pm PT)</span>}
         </p>

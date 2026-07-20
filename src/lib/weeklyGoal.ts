@@ -1,14 +1,16 @@
 /**
- * Two separate goal systems that track independently:
+ * Two goals that track differently:
  *
- * WEEKLY GOAL: 57, 114, 171, 228... (resets Sunday 8pm Pacific)
- * - Uses the full lifetime points
- * - Target increments by 57 each time
+ * WEEKLY GOAL: 57, 114, 171, 228... forever, off the lifetime point total.
+ * Its stats window resets Sunday 8pm Pacific, but the number itself never
+ * goes back down.
  *
- * SATURDAY GOAL: 19, 38, 57, 76... (resets Saturday 8pm Pacific)
- * - Activated only Saturday 8pm - Sunday 7:59pm Pacific
- * - Takes the weekly counter, subtracts passed goals, divides by 3
- * - Left: (current - 57 * completed) / 3, Right: always 19
+ * SATURDAY GOAL: 19, 38, 57, 76... The moment Saturday 8pm Pacific hits,
+ * whatever the weekly "left number" is at that instant gets divided by 3
+ * once, and that's where Saturday starts counting from. After that, every
+ * new contribution during the window adds its full value on top, same as
+ * normal, it doesn't get divided again. See goalStore's syncSaturdayWindow
+ * for where that one-time snapshot actually happens.
  */
 
 export const WEEKLY_STEP = 57;
@@ -25,27 +27,23 @@ export function weeklyTarget(points: number): number {
   return (completedWeeklyGoals(points) + 1) * WEEKLY_STEP;
 }
 
-/** Saturday counter left side: (current - 57 * goals) / 3, as a decimal string with 2 places */
-export function saturdayLeft(points: number): string {
-  const goals = completedWeeklyGoals(points);
-  const value = (points - WEEKLY_STEP * goals) / SATURDAY_DIVISOR;
-  return value.toFixed(2);
-}
-
-/** Saturday target (19, 38, 57, 76...) based on current Saturday progress. */
-export function saturdayTarget(points: number): number {
-  const left = parseFloat(saturdayLeft(points));
-  const goalsCompleted = Math.floor(left / SATURDAY_STEP);
-  return (goalsCompleted + 1) * SATURDAY_STEP;
-}
-
-/** Stars for completed weekly goals (one per 57-point goal). */
+/** Stars for completed weekly goals, one per 57 point goal passed. */
 export function weeklyStars(points: number): string {
   return "*".repeat(completedWeeklyGoals(points));
 }
 
-/** Progress through current weekly goal (0..57). */
+/** Progress through the current weekly goal (0..57). */
 export function weeklyProgress(points: number): { done: number; ratio: number } {
   const done = points - completedWeeklyGoals(points) * WEEKLY_STEP;
   return { done, ratio: done / WEEKLY_STEP };
+}
+
+/** How many complete Saturday goals a given Saturday counter has passed. */
+export function completedSaturdayGoals(saturdayPoints: number): number {
+  return Math.floor(saturdayPoints / SATURDAY_STEP);
+}
+
+/** The Saturday target (19, 38, 57, 76...) based on its own running counter. */
+export function saturdayTarget(saturdayPoints: number): number {
+  return (completedSaturdayGoals(saturdayPoints) + 1) * SATURDAY_STEP;
 }

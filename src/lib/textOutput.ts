@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { weeklyTarget, saturdayLeft, saturdayTarget, weeklyStars } from "./weeklyGoal";
+import { weeklyTarget, saturdayTarget, weeklyStars } from "./weeklyGoal";
 import { formatPoints, formatPointsFixed } from "./format";
 import { inTauri } from "./env";
 
@@ -25,14 +25,21 @@ export function renderWeeklyText(points: number, template: string): string {
 
 /**
  * Render the Saturday goal text (only active Sat 8pm - Sun 7:59pm PT).
+ * `saturdayPoints` is the independent Saturday counter from goalStore, not
+ * derived live from the weekly total, so this stays exact even after the
+ * one-time divide-by-3 snapshot. Stars still reflect weekly goals passed.
+ *
  * Placeholders: {current}, {target}, {stars}.
  */
-export function renderSaturdayText(points: number, template: string): string {
-  const current = saturdayLeft(points);
-  const target = saturdayTarget(points);
-  const stars = weeklyStars(points);
+export function renderSaturdayText(
+  saturdayPoints: number,
+  weeklyPoints: number,
+  template: string,
+): string {
+  const target = saturdayTarget(saturdayPoints);
+  const stars = weeklyStars(weeklyPoints);
   return (template || DEFAULT_SATURDAY_TEMPLATE)
-    .replaceAll("{current}", current)
+    .replaceAll("{current}", formatPoints(saturdayPoints))
     .replaceAll("{target}", String(target))
     .replaceAll("{stars}", stars)
     .trimEnd();
