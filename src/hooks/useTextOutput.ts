@@ -28,11 +28,7 @@ async function sync(): Promise<void> {
     settings.saturdayOutputPath.trim() &&
     isInSaturdayWindow()
   ) {
-    const text = renderSaturdayText(
-      state.saturday.points,
-      state.points,
-      settings.saturdayOutputTemplate,
-    );
+    const text = renderSaturdayText(state.saturday.points, settings.saturdayOutputTemplate);
     try {
       await writeTextFile(settings.saturdayOutputPath.trim(), text);
     } catch (err) {

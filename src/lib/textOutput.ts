@@ -1,17 +1,18 @@
 import { invoke } from "@tauri-apps/api/core";
-import { weeklyTarget, saturdayTarget, weeklyStars } from "./weeklyGoal";
+import { weeklyTarget, weeklyStars, saturdayTarget, saturdayStars } from "./weeklyGoal";
 import { formatPoints, formatPointsFixed } from "./format";
 import { inTauri } from "./env";
 
-export const DEFAULT_WEEKLY_TEMPLATE = "{current} / {target}";
+export const DEFAULT_WEEKLY_TEMPLATE = "{current} / {target} {stars}";
 export const DEFAULT_SATURDAY_TEMPLATE = "{current} / {target} {stars}";
 
 /**
  * Render the weekly goal text. `points` already carries fractional bits and
  * cents directly (see goalStore), so {current} always reflects every
- * contribution exactly, down to the cent/bit.
+ * contribution exactly, down to the cent/bit. A star gets added every time
+ * the target crosses another 57.
  *
- * Placeholders: {current}, {current_decimal}, {target}, {remaining}.
+ * Placeholders: {current}, {current_decimal}, {target}, {remaining}, {stars}.
  */
 export function renderWeeklyText(points: number, template: string): string {
   const target = weeklyTarget(points);
@@ -20,6 +21,7 @@ export function renderWeeklyText(points: number, template: string): string {
     .replaceAll("{current_decimal}", formatPointsFixed(points))
     .replaceAll("{target}", String(target))
     .replaceAll("{remaining}", formatPoints(target - points))
+    .replaceAll("{stars}", weeklyStars(points))
     .trimEnd();
 }
 
@@ -27,21 +29,17 @@ export function renderWeeklyText(points: number, template: string): string {
  * Render the Saturday goal text (only active Sat 8pm - Sun 7:59pm PT).
  * `saturdayPoints` is the independent Saturday counter from goalStore, not
  * derived live from the weekly total, so this stays exact even after the
- * one-time divide-by-3 snapshot. Stars still reflect weekly goals passed.
+ * one-time divide-by-3 snapshot. A star gets added every time Saturday's
+ * own target crosses another 19, separate from weekly's stars.
  *
  * Placeholders: {current}, {target}, {stars}.
  */
-export function renderSaturdayText(
-  saturdayPoints: number,
-  weeklyPoints: number,
-  template: string,
-): string {
+export function renderSaturdayText(saturdayPoints: number, template: string): string {
   const target = saturdayTarget(saturdayPoints);
-  const stars = weeklyStars(weeklyPoints);
   return (template || DEFAULT_SATURDAY_TEMPLATE)
     .replaceAll("{current}", formatPoints(saturdayPoints))
     .replaceAll("{target}", String(target))
-    .replaceAll("{stars}", stars)
+    .replaceAll("{stars}", saturdayStars(saturdayPoints))
     .trimEnd();
 }
 

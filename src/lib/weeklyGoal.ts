@@ -47,3 +47,8 @@ export function completedSaturdayGoals(saturdayPoints: number): number {
 export function saturdayTarget(saturdayPoints: number): number {
   return (completedSaturdayGoals(saturdayPoints) + 1) * SATURDAY_STEP;
 }
+
+/** Stars for completed Saturday goals, one per 19 point goal passed during the window. */
+export function saturdayStars(saturdayPoints: number): string {
+  return "*".repeat(completedSaturdayGoals(saturdayPoints));
+}
