@@ -28,7 +28,11 @@ async function sync(): Promise<void> {
     settings.saturdayOutputPath.trim() &&
     isInSaturdayWindow()
   ) {
-    const text = renderSaturdayText(state.points, settings.saturdayOutputTemplate);
+    const text = renderSaturdayText(
+      state.saturday.points,
+      state.points,
+      settings.saturdayOutputTemplate,
+    );
     try {
       await writeTextFile(settings.saturdayOutputPath.trim(), text);
     } catch (err) {
@@ -47,7 +51,7 @@ async function sync(): Promise<void> {
 export function useTextOutput(): void {
   useEffect(() => {
     const unsubGoal = useGoalStore.subscribe((state, prev) => {
-      if (state.points !== prev.points) void sync();
+      if (state.points !== prev.points || state.saturday !== prev.saturday) void sync();
     });
     const unsubSettings = useSettingsStore.subscribe((state, prev) => {
       if (

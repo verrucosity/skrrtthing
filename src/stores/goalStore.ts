@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import type { GoalData, LogEntry, SubTier } from "../types";
 import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, roundPoints } from "../lib/goal";
-import { completedWeeklyGoals } from "../lib/weeklyGoal";
-import { weeklyKey } from "../lib/weeklyWindow";
+import { completedWeeklyGoals, SATURDAY_DIVISOR, weeklyProgress } from "../lib/weeklyGoal";
+import { isInSaturdayWindow, saturdayKey, weeklyKey } from "../lib/weeklyWindow";
 import { formatUsd, formatPoints } from "../lib/format";
 import { loadData, saveData } from "../lib/storage";
 
@@ -30,6 +30,10 @@ function emptyData(now = new Date()): GoalData {
       subs: 0,
       donationCents: 0,
     },
+    saturday: {
+      windowStart: null,
+      points: 0,
+    },
     history: [],
     log: [],
   };
@@ -37,6 +41,38 @@ function emptyData(now = new Date()): GoalData {
 
 function tierLabel(tier: SubTier): string {
   return { "1000": "Tier 1", "2000": "Tier 2", "3000": "Tier 3" }[tier];
+}
+
+/**
+ * Figures out whether the Saturday window just opened or just closed, and
+ * returns the state changes for that transition (or null if nothing
+ * changed). Opening the window takes a one-time snapshot: whatever the
+ * weekly "left number" is right now gets divided by 3 once, and that's
+ * where Saturday starts. Closing it just clears things out so next
+ * Saturday starts clean.
+ */
+function syncSaturdayWindow(
+  data: Pick<GoalData, "points" | "saturday">,
+  now: Date,
+): Partial<GoalData> | null {
+  const inWindow = isInSaturdayWindow(now);
+
+  if (inWindow) {
+    const key = saturdayKey(now);
+    if (data.saturday.windowStart === key) return null; // already snapshotted this window
+    const weeklyLeft = weeklyProgress(data.points).done;
+    return {
+      saturday: {
+        windowStart: key,
+        points: roundPoints(weeklyLeft / SATURDAY_DIVISOR),
+      },
+    };
+  }
+
+  if (data.saturday.windowStart !== null) {
+    return { saturday: { windowStart: null, points: 0 } };
+  }
+  return null;
 }
 
 interface GoalStore extends GoalData {
@@ -53,25 +89,38 @@ interface GoalStore extends GoalData {
 }
 
 export const useGoalStore = create<GoalStore>((set, get) => {
-  /** Apply a contribution: bump the counter, weekly window and log, then persist. */
+  /** Apply a contribution: bump the counter, weekly window, Saturday window and log, then persist. */
   function apply(
     points: number,
     entry: Omit<LogEntry, "id" | "at" | "points">,
     patch: (data: GoalData) => Partial<GoalData>,
   ): void {
+    const now = new Date();
     set((state) => {
-      const changes = patch(state);
+      const satSync = syncSaturdayWindow(state, now);
+      const afterSync = satSync ? { ...state, ...satSync } : state;
+      const changes = patch(afterSync);
+
+      // Add the full, undivided contribution on top of Saturday's counter,
+      // but only once it's actually been snapshotted for this window.
+      const saturday = changes.saturday ?? afterSync.saturday;
+      const saturdayNext =
+        isInSaturdayWindow(now) && saturday.windowStart === saturdayKey(now)
+          ? { ...saturday, points: roundPoints(saturday.points + points) }
+          : saturday;
+
       return {
         ...changes,
-        points: roundPoints(state.points + points),
+        points: roundPoints(afterSync.points + points),
         week: {
-          ...state.week,
+          ...afterSync.week,
           ...changes.week,
-          points: roundPoints(state.week.points + points),
+          points: roundPoints(afterSync.week.points + points),
         },
+        saturday: saturdayNext,
         log: [
-          { id: crypto.randomUUID(), at: new Date().toISOString(), points, ...entry },
-          ...state.log,
+          { id: crypto.randomUUID(), at: now.toISOString(), points, ...entry },
+          ...afterSync.log,
         ].slice(0, LOG_LIMIT),
       };
     });
@@ -84,6 +133,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
       points: s.points,
       stats: s.stats,
       week: s.week,
+      saturday: s.saturday,
       history: s.history,
       log: s.log,
     };
@@ -189,10 +239,22 @@ export const useGoalStore = create<GoalStore>((set, get) => {
       );
     },
 
+    /**
+     * Runs on a timer and on hydrate. Handles the weekly stats window
+     * rollover, and also checks whether the Saturday window needs to open
+     * or close even when no contribution has come in to trigger it.
+     */
     rolloverIfNeeded(now = new Date()) {
       const state = get();
+
+      const satSync = syncSaturdayWindow(state, now);
+      if (satSync) set(satSync);
+
       const key = weeklyKey(now);
-      if (state.week.start === key) return;
+      if (state.week.start === key) {
+        if (satSync) persist();
+        return;
+      }
 
       // Archive the finished week (skip completely empty ones) and start fresh.
       const history = [...state.history];
@@ -235,6 +297,8 @@ export const useGoalStore = create<GoalStore>((set, get) => {
      * doesn't touch stats (bits/subs/donations totals) since this isn't a
      * real contribution, just a starting point correction. Accepts
      * decimals since bits can leave the counter at a fractional value.
+     * Also clears any Saturday snapshot so it gets recomputed fresh off
+     * the corrected number next time the window is active.
      */
     setPoints(points) {
       if (!Number.isFinite(points) || points < 0) return;
@@ -244,6 +308,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
         return {
           points: rounded,
           week: { ...state.week, points: roundPoints(state.week.points + delta) },
+          saturday: { windowStart: null, points: 0 },
           log: [
             {
               id: crypto.randomUUID(),

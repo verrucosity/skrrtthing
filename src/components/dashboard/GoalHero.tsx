@@ -2,7 +2,6 @@ import { useGoalStore } from "../../stores/goalStore";
 import { useNow } from "../../hooks/useNow";
 import {
   completedWeeklyGoals,
-  saturdayLeft,
   saturdayTarget,
   weeklyProgress,
   weeklyStars,
@@ -14,6 +13,7 @@ import { ProgressBar } from "../ui/ProgressBar";
 
 export function GoalHero() {
   const points = useGoalStore((s) => s.points);
+  const saturday = useGoalStore((s) => s.saturday);
   const now = useNow();
 
   const target = weeklyTarget(points);
@@ -63,7 +63,7 @@ export function GoalHero() {
               : "text-2xl font-semibold tabular-nums text-zinc-600"
           }
         >
-          {saturdayLeft(points)} / {saturdayTarget(points)}
+          {formatPoints(saturday.points)} / {saturdayTarget(saturday.points)}
         </p>
         {!inSaturdayWindow && (
           <p className="mt-1 text-xs text-zinc-600">Activates Saturday 8pm PT</p>

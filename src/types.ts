@@ -45,6 +45,21 @@ export interface WeekSummary {
   goalsCompleted: number;
 }
 
+export interface SaturdayState {
+  /**
+   * ISO date key of the Saturday window this snapshot belongs to, or null
+   * if the window hasn't been snapshotted yet (either it's not active, or
+   * the app hasn't run since it opened).
+   */
+  windowStart: string | null;
+  /**
+   * The Saturday counter. Set once per window from the weekly "left number"
+   * divided by 3, then every contribution during the window adds its full,
+   * undivided value on top.
+   */
+  points: number;
+}
+
 export interface GoalData {
   /**
    * The lifetime counter, as a running decimal. Every bit and cent counts
@@ -54,6 +69,7 @@ export interface GoalData {
   points: number;
   stats: Stats;
   week: WeekState;
+  saturday: SaturdayState;
   history: WeekSummary[];
   log: LogEntry[];
 }
