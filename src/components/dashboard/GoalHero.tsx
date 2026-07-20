@@ -1,7 +1,9 @@
 import { useGoalStore } from "../../stores/goalStore";
 import { useNow } from "../../hooks/useNow";
 import {
+  completedSaturdayGoals,
   completedWeeklyGoals,
+  saturdayStars,
   saturdayTarget,
   weeklyProgress,
   weeklyStars,
@@ -19,6 +21,7 @@ export function GoalHero() {
   const target = weeklyTarget(points);
   const { done, ratio } = weeklyProgress(points);
   const completed = completedWeeklyGoals(points);
+  const saturdayCompleted = completedSaturdayGoals(saturday.points);
   const inSaturdayWindow = isInSaturdayWindow(now);
 
   return (
@@ -56,15 +59,25 @@ export function GoalHero() {
         <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
           Saturday Goal {inSaturdayWindow ? "(active)" : "(inactive)"}
         </p>
-        <p
-          className={
-            inSaturdayWindow
-              ? "text-2xl font-semibold tabular-nums text-zinc-100"
-              : "text-2xl font-semibold tabular-nums text-zinc-600"
-          }
-        >
-          {formatPoints(saturday.points)} / {saturdayTarget(saturday.points)}
-        </p>
+        <div className="flex items-center justify-center gap-2">
+          <p
+            className={
+              inSaturdayWindow
+                ? "text-2xl font-semibold tabular-nums text-zinc-100"
+                : "text-2xl font-semibold tabular-nums text-zinc-600"
+            }
+          >
+            {formatPoints(saturday.points)} / {saturdayTarget(saturday.points)}
+          </p>
+          {saturdayCompleted > 0 && (
+            <span
+              className="font-mono text-lg tracking-widest text-accent-hover"
+              title={`${saturdayCompleted} Saturday goal${saturdayCompleted === 1 ? "" : "s"} completed`}
+            >
+              {saturdayStars(saturday.points)}
+            </span>
+          )}
+        </div>
         {!inSaturdayWindow && (
           <p className="mt-1 text-xs text-zinc-600">Activates Saturday 8pm PT</p>
         )}
