@@ -14,7 +14,7 @@ import { useWizardStore } from "../stores/wizardStore";
 import { missingScopes, validateToken } from "../services/twitch/api";
 import { Modal } from "../components/ui/Modal";
 import { testStreamlabsToken } from "../services/streamlabs/socket";
-import { openExternal } from "../lib/external";
+import { openExternal, downloadAndRunInstaller } from "../lib/external";
 import {
   DEFAULT_WEEKLY_TEMPLATE,
   DEFAULT_SATURDAY_TEMPLATE,
@@ -32,6 +32,8 @@ export function Settings() {
   const updateChecking = useUpdateStore((s) => s.checking);
   const updateError = useUpdateStore((s) => s.error);
   const clearUpdate = useUpdateStore((s) => s.clear);
+  const [installing, setInstalling] = useState(false);
+  const [installError, setInstallError] = useState<string | null>(null);
 
   return (
     <Page title="Settings" description="Your credentials stay right here on this machine, in the app's data folder.">
@@ -57,9 +59,15 @@ export function Settings() {
         onClose={clearUpdate}
         actions={[
           {
-            label: "Download",
+            label: installing ? "Installing..." : "Update Now",
             onClick: () => {
-              if (updateAvailable) openExternal(updateAvailable.downloadUrl);
+              if (!updateAvailable) return;
+              setInstallError(null);
+              setInstalling(true);
+              void downloadAndRunInstaller(updateAvailable.downloadUrl).catch((err) => {
+                setInstalling(false);
+                setInstallError(typeof err === "string" ? err : String(err));
+              });
             },
             variant: "primary",
           },
@@ -71,8 +79,11 @@ export function Settings() {
             available.
           </p>
           <p className="text-xs text-zinc-400">
-            Grab the new .msi installer and run it, that's all it takes to update.
+            {installing
+              ? "Downloading the update, this app will close and the installer will pick up from there."
+              : "This downloads and runs the installer for you, right over the current install."}
           </p>
+          {installError && <p className="text-xs text-red-400">{installError}</p>}
           {updateAvailable?.body && (
             <div className="max-h-48 overflow-y-auto rounded bg-raised p-2 text-xs text-zinc-300">
               {updateAvailable.body}
