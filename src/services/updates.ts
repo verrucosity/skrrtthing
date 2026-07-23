@@ -40,16 +40,16 @@ export async function getLatestRelease(): Promise<Release> {
     assets: Array<{ name: string; browser_download_url: string }>;
   };
 
-  const msiAsset = data.assets.find((a) => a.name.endsWith(".msi"));
-  if (!msiAsset) {
-    throw new Error("Latest release has no .msi installer attached");
+  const exeAsset = data.assets.find((a) => a.name.endsWith(".exe"));
+  if (!exeAsset) {
+    throw new Error("Latest release has no installer attached");
   }
 
   return {
     tagName: data.tag_name,
     name: data.name,
     body: data.body,
-    downloadUrl: msiAsset.browser_download_url,
+    downloadUrl: exeAsset.browser_download_url,
   };
 }
 
