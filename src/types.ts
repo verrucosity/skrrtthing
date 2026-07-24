@@ -80,13 +80,14 @@ export interface Settings {
   twitchToken: string;
   streamlabsToken: string;
   autoConnect: boolean;
-  /** Weekly goal (57, 114, 171...) text file output. */
+  /**
+   * Single OBS text file output: shows the weekly goal (57, 114, 171...)
+   * most of the time, switching to the Saturday goal (19, 38, 57...) during
+   * the Saturday 8pm - Sun 7:59pm PT window.
+   */
   weeklyOutputEnabled: boolean;
   weeklyOutputPath: string;
   weeklyOutputTemplate: string;
-  /** Saturday goal (19, 38, 57...) text file output (Sat 8pm - Sun 7:59pm PT). */
-  saturdayOutputEnabled: boolean;
-  saturdayOutputPath: string;
   saturdayOutputTemplate: string;
 }
 

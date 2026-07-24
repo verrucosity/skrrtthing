@@ -42,7 +42,6 @@ export function Settings() {
         <StreamlabsSection />
         <StartingPointSection />
         <WeeklyOutputSection />
-        <SaturdayOutputSection />
         <GeneralSection />
         <TestEventsSection />
         <UpdateSection
@@ -328,14 +327,17 @@ function WeeklyOutputSection() {
   const enabled = useSettingsStore((s) => s.weeklyOutputEnabled);
   const path = useSettingsStore((s) => s.weeklyOutputPath);
   const template = useSettingsStore((s) => s.weeklyOutputTemplate);
+  const saturdayTemplate = useSettingsStore((s) => s.saturdayOutputTemplate);
   const update = useSettingsStore((s) => s.update);
   const points = useGoalStore((s) => s.points);
+  const saturday = useGoalStore((s) => s.saturday);
   const lastWriteAt = useTextOutputStore((s) => s.weeklyLastWriteAt);
   const writeError = useTextOutputStore((s) => s.weeklyError);
+  const inWindow = isInSaturdayWindow();
 
   return (
     <Card
-      title="Weekly Goal Output"
+      title="Goal Output"
       action={
         <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
           Enabled
@@ -350,82 +352,42 @@ function WeeklyOutputSection() {
     >
       <div className="space-y-4">
         <p className="text-xs text-zinc-500">
-          This writes the weekly goal (57, 114, 171 and so on) to a text file every time it
-          changes. In OBS, add a <span className="text-zinc-400">Text (GDI+)</span> source, turn
-          on <span className="text-zinc-400">Read from file</span>, and point it at this file.
+          Writes the current goal to a single text file, updating every time it changes. In OBS,
+          add a <span className="text-zinc-400">Text (GDI+)</span> source, turn on{" "}
+          <span className="text-zinc-400">Read from file</span>, and point it at this file. During
+          the Saturday 8pm to Sunday 7:59pm PT window it switches over to the Saturday goal, then
+          switches back to the weekly goal once the window closes.
         </p>
         <Input
           label="Output file"
           value={path}
           onChange={(e) => update({ weeklyOutputPath: e.target.value })}
-          placeholder="C:\Users\you\Documents\skrrt-weekly.txt"
+          placeholder="C:\Users\you\Documents\skrrt-goal.txt"
         />
         <Input
-          label="Format"
+          label="Weekly format"
           value={template}
           onChange={(e) => update({ weeklyOutputTemplate: e.target.value })}
           placeholder={DEFAULT_WEEKLY_TEMPLATE}
           hint="Placeholders: {current}, {current_decimal}, {target}, {remaining}, {stars}"
         />
-        <p className="text-xs text-zinc-500">
-          Preview: <span className="font-mono text-zinc-300">{renderWeeklyText(points, template)}</span>
-        </p>
-        {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
-        {enabled && !writeError && lastWriteAt && (
-          <p className="text-xs text-emerald-400">Last written {formatTime(lastWriteAt)}</p>
-        )}
-      </div>
-    </Card>
-  );
-}
-
-function SaturdayOutputSection() {
-  const enabled = useSettingsStore((s) => s.saturdayOutputEnabled);
-  const path = useSettingsStore((s) => s.saturdayOutputPath);
-  const template = useSettingsStore((s) => s.saturdayOutputTemplate);
-  const update = useSettingsStore((s) => s.update);
-  const saturday = useGoalStore((s) => s.saturday);
-  const lastWriteAt = useTextOutputStore((s) => s.saturdayLastWriteAt);
-  const writeError = useTextOutputStore((s) => s.saturdayError);
-  const inWindow = isInSaturdayWindow();
-
-  return (
-    <Card
-      title="Saturday Goal Output"
-      action={
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
-          Enabled
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => update({ saturdayOutputEnabled: e.target.checked })}
-            className="h-4 w-4 accent-[#9147ff]"
-          />
-        </label>
-      }
-    >
-      <div className="space-y-4">
-        <p className="text-xs text-zinc-500">
-          This one only writes during the Saturday 8pm to Sunday 7:59pm PT window. Outside of
-          that, the file just sits there untouched.
-        </p>
         <Input
-          label="Output file"
-          value={path}
-          onChange={(e) => update({ saturdayOutputPath: e.target.value })}
-          placeholder="C:\Users\you\Documents\skrrt-saturday.txt"
-        />
-        <Input
-          label="Format"
-          value={template}
+          label="Saturday format"
+          value={saturdayTemplate}
           onChange={(e) => update({ saturdayOutputTemplate: e.target.value })}
           placeholder={DEFAULT_SATURDAY_TEMPLATE}
           hint="Placeholders: {current}, {target}, {stars}"
         />
         <p className="text-xs text-zinc-500">
-          Preview: <span className="font-mono text-zinc-300">{renderSaturdayText(saturday.points, template)}</span>
-          {inWindow && <span className="ml-2 text-emerald-400">(active now)</span>}
-          {!inWindow && <span className="ml-2 text-zinc-600">(inactive until Sat 8pm PT)</span>}
+          Preview:{" "}
+          <span className="font-mono text-zinc-300">
+            {inWindow ? renderSaturdayText(saturday.points, saturdayTemplate) : renderWeeklyText(points, template)}
+          </span>
+          {inWindow ? (
+            <span className="ml-2 text-emerald-400">(showing Saturday goal now)</span>
+          ) : (
+            <span className="ml-2 text-zinc-600">(showing weekly goal, Saturday takes over at 8pm PT)</span>
+          )}
         </p>
         {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}
         {enabled && !writeError && lastWriteAt && (

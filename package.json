@@ -1,7 +1,7 @@
 {
   "name": "skrrt-goal-thingy",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Weekly community goal tracker for Twitch streamers",
   "type": "module",
   "scripts": {

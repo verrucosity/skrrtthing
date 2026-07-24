@@ -11,8 +11,6 @@ const defaults: Settings = {
   weeklyOutputEnabled: false,
   weeklyOutputPath: "",
   weeklyOutputTemplate: DEFAULT_WEEKLY_TEMPLATE,
-  saturdayOutputEnabled: false,
-  saturdayOutputPath: "",
   saturdayOutputTemplate: DEFAULT_SATURDAY_TEMPLATE,
 };
 
@@ -42,8 +40,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       weeklyOutputEnabled,
       weeklyOutputPath,
       weeklyOutputTemplate,
-      saturdayOutputEnabled,
-      saturdayOutputPath,
       saturdayOutputTemplate,
     } = get();
     void saveSettings({
@@ -54,8 +50,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       weeklyOutputEnabled,
       weeklyOutputPath,
       weeklyOutputTemplate,
-      saturdayOutputEnabled,
-      saturdayOutputPath,
       saturdayOutputTemplate,
     } satisfies Settings);
   },
