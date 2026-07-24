@@ -3,7 +3,7 @@ import { useUpdateStore } from "../stores/updateStore";
 import { getLatestRelease, isNewerVersion } from "../services/updates";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-export const APP_VERSION = "0.1.0";
+export const APP_VERSION = __APP_VERSION__;
 
 /** Silent background check, errors are swallowed so a flaky connection doesn't nag the user. */
 async function checkSilently(): Promise<void> {
