@@ -12,9 +12,12 @@ async function sync(): Promise<void> {
   const settings = useSettingsStore.getState();
   const status = useTextOutputStore.getState();
 
-  // Write weekly file
+  // One file: shows the Saturday goal during its window (Sat 8pm - Sun
+  // 7:59pm PT), and the weekly goal the rest of the time.
   if (settings.weeklyOutputEnabled && settings.weeklyOutputPath.trim()) {
-    const text = renderWeeklyText(state.points, settings.weeklyOutputTemplate);
+    const text = isInSaturdayWindow()
+      ? renderSaturdayText(state.saturday.points, settings.saturdayOutputTemplate)
+      : renderWeeklyText(state.points, settings.weeklyOutputTemplate);
     try {
       await writeTextFile(settings.weeklyOutputPath.trim(), text);
     } catch (err) {
@@ -22,27 +25,14 @@ async function sync(): Promise<void> {
     }
   }
 
-  // Write Saturday file only during the Saturday 8pm - Sunday 7:59pm PT window
-  if (
-    settings.saturdayOutputEnabled &&
-    settings.saturdayOutputPath.trim() &&
-    isInSaturdayWindow()
-  ) {
-    const text = renderSaturdayText(state.saturday.points, settings.saturdayOutputTemplate);
-    try {
-      await writeTextFile(settings.saturdayOutputPath.trim(), text);
-    } catch (err) {
-      status.recordSaturdayError(typeof err === "string" ? err : String(err));
-    }
-  }
-
   status.recordSuccess();
 }
 
 /**
- * Keeps the OBS text files in sync: writes immediately when the counter or
- * output settings change, and refreshes every few seconds. The Saturday file
- * only writes during its active window (Sat 8pm - Sun 7:59pm PT).
+ * Keeps the OBS text file in sync: writes immediately when the counter or
+ * output settings change, and refreshes every few seconds. The file itself
+ * switches content at the Saturday window boundary (Sat 8pm - Sun 7:59pm
+ * PT) rather than writing to a second file.
  */
 export function useTextOutput(): void {
   useEffect(() => {
@@ -54,8 +44,6 @@ export function useTextOutput(): void {
         state.weeklyOutputEnabled !== prev.weeklyOutputEnabled ||
         state.weeklyOutputPath !== prev.weeklyOutputPath ||
         state.weeklyOutputTemplate !== prev.weeklyOutputTemplate ||
-        state.saturdayOutputEnabled !== prev.saturdayOutputEnabled ||
-        state.saturdayOutputPath !== prev.saturdayOutputPath ||
         state.saturdayOutputTemplate !== prev.saturdayOutputTemplate
       ) {
         void sync();

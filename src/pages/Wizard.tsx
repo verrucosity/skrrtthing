@@ -291,7 +291,7 @@ function StartingPointStep({ onNext, onBack }: { onNext: () => void; onBack: () 
 
 function ObsStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const update = useSettingsStore((s) => s.update);
-  const [paths, setPaths] = useState<{ weekly: string; saturday: string } | null>(null);
+  const [paths, setPaths] = useState<{ weekly: string } | null>(null);
 
   useEffect(() => {
     void getSuggestedOutputPaths().then(setPaths);
@@ -302,29 +302,26 @@ function ObsStep({ onNext, onBack }: { onNext: () => void; onBack: () => void })
     update({
       weeklyOutputEnabled: true,
       weeklyOutputPath: paths.weekly,
-      saturdayOutputEnabled: true,
-      saturdayOutputPath: paths.saturday,
     });
     onNext();
   }
 
   return (
     <StepShell
-      title="OBS Text Files"
-      description="skrrt writes the goal numbers to two text files. Point an OBS Text source at each one and you're good to go."
+      title="OBS Text File"
+      description="skrrt writes the current goal to one text file. Point an OBS Text source at it and you're good to go."
       onNext={useDefaults}
       onBack={onBack}
-      nextLabel="Use These Paths"
+      nextLabel="Use This Path"
       nextDisabled={!paths}
       skip={{ label: "Set up later", onClick: onNext }}
     >
       <div className="space-y-3">
-        {paths && (
-          <>
-            <CopyField label="Weekly goal file (57, 114, 171...)" value={paths.weekly} />
-            <CopyField label="Saturday goal file (19, 38, 57...)" value={paths.saturday} />
-          </>
-        )}
+        {paths && <CopyField label="Goal file" value={paths.weekly} />}
+        <p className="text-xs text-zinc-500">
+          Shows the weekly goal (57, 114, 171...) most of the time, and switches over to the
+          Saturday goal (19, 38, 57...) during the Saturday 8pm-Sunday 7:59pm PT window.
+        </p>
         <div className="rounded-md bg-raised p-3 text-xs text-zinc-400">
           <p className="mb-1 font-medium text-zinc-300">In OBS:</p>
           <ol className="list-decimal space-y-0.5 pl-4">
