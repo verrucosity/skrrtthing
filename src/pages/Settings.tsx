@@ -41,6 +41,7 @@ export function Settings() {
         <TwitchSection />
         <StreamlabsSection />
         <StartingPointSection />
+        <SaturdayOverrideSection />
         <WeeklyOutputSection />
         <GeneralSection />
         <TestEventsSection />
@@ -318,6 +319,75 @@ function StartingPointSection() {
           You're currently at <span className="font-mono text-zinc-300">{points}</span> points.
         </p>
         {saved && <p className="text-xs text-emerald-400">Counter updated.</p>}
+      </div>
+    </Card>
+  );
+}
+
+function SaturdayOverrideSection() {
+  const saturday = useGoalStore((s) => s.saturday);
+  const setSaturdayPoints = useGoalStore((s) => s.setSaturdayPoints);
+  const saturdayForced = useSettingsStore((s) => s.saturdayForced);
+  const update = useSettingsStore((s) => s.update);
+  const [value, setValue] = useState(String(saturday.points));
+  const [saved, setSaved] = useState(false);
+
+  const parsed = Number(value);
+  const valid = value.trim() !== "" && Number.isFinite(parsed) && parsed >= 0;
+
+  function apply() {
+    if (!valid) return;
+    setSaturdayPoints(parsed);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <Card title="Saturday Override">
+      <div className="space-y-4">
+        <p className="text-xs text-zinc-500">
+          If the Saturday window ever misfires (wrong time, wrong snapshot), these are your manual
+          fallbacks. This doesn't touch bits, subs or donation totals.
+        </p>
+
+        <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md border border-edge bg-raised px-3 py-2 text-xs text-zinc-300">
+          <span>
+            <span className="font-medium text-zinc-100">Force Saturday Mode</span>
+            <br />
+            <span className="text-zinc-500">
+              Treats the Saturday goal as active right now, regardless of the actual time. Turn it
+              off once the real window catches up.
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            checked={saturdayForced}
+            onChange={(e) => update({ saturdayForced: e.target.checked })}
+            className="h-4 w-4 shrink-0 accent-[#9147ff]"
+          />
+        </label>
+
+        <div className="flex items-end gap-2">
+          <Input
+            label="Saturday points"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="0"
+            inputMode="numeric"
+          />
+          <Button onClick={apply} disabled={!valid || parsed === saturday.points} variant="primary">
+            Set
+          </Button>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Saturday is currently at{" "}
+          <span className="font-mono text-zinc-300">{saturday.points}</span> points. Setting this
+          directly skips the usual weekly-leftover / 3 snapshot math.
+        </p>
+        {saved && <p className="text-xs text-emerald-400">Saturday counter updated.</p>}
       </div>
     </Card>
   );

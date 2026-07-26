@@ -1,4 +1,5 @@
 import { useGoalStore } from "../../stores/goalStore";
+import { useSettingsStore } from "../../stores/settingsStore";
 import { useNow } from "../../hooks/useNow";
 import {
   completedSaturdayGoals,
@@ -16,13 +17,14 @@ import { ProgressBar } from "../ui/ProgressBar";
 export function GoalHero() {
   const points = useGoalStore((s) => s.points);
   const saturday = useGoalStore((s) => s.saturday);
+  const saturdayForced = useSettingsStore((s) => s.saturdayForced);
   const now = useNow();
 
   const target = weeklyTarget(points);
   const { done, ratio } = weeklyProgress(points);
   const completed = completedWeeklyGoals(points);
   const saturdayCompleted = completedSaturdayGoals(saturday.points);
-  const inSaturdayWindow = isInSaturdayWindow(now);
+  const inSaturdayWindow = isInSaturdayWindow(now) || saturdayForced;
 
   return (
     <section className="rounded-lg border border-edge bg-surface px-6 py-7">

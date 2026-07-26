@@ -5,9 +5,19 @@ import { completedWeeklyGoals, SATURDAY_DIVISOR, weeklyProgress } from "../lib/w
 import { isInSaturdayWindow, saturdayKey, weeklyKey } from "../lib/weeklyWindow";
 import { formatUsd, formatPoints } from "../lib/format";
 import { loadData, saveData } from "../lib/storage";
+import { useSettingsStore } from "./settingsStore";
 
 const LOG_LIMIT = 500;
 const HISTORY_LIMIT = 104; // two years of weeks
+
+/**
+ * Whether the Saturday goal should be treated as active right now: either
+ * the real time window, or the manual "Force Saturday Mode" override in
+ * Settings (an escape hatch in case the time-based check ever misfires).
+ */
+function saturdayActive(now: Date): boolean {
+  return isInSaturdayWindow(now) || useSettingsStore.getState().saturdayForced;
+}
 
 function emptyData(now = new Date()): GoalData {
   return {
@@ -55,7 +65,7 @@ function syncSaturdayWindow(
   data: Pick<GoalData, "points" | "saturday">,
   now: Date,
 ): Partial<GoalData> | null {
-  const inWindow = isInSaturdayWindow(now);
+  const inWindow = saturdayActive(now);
 
   if (inWindow) {
     const key = saturdayKey(now);
@@ -86,6 +96,7 @@ interface GoalStore extends GoalData {
   clearLog(): void;
   resetEverything(): void;
   setPoints(points: number): void;
+  setSaturdayPoints(points: number): void;
 }
 
 export const useGoalStore = create<GoalStore>((set, get) => {
@@ -105,7 +116,7 @@ export const useGoalStore = create<GoalStore>((set, get) => {
       // but only once it's actually been snapshotted for this window.
       const saturday = changes.saturday ?? afterSync.saturday;
       const saturdayNext =
-        isInSaturdayWindow(now) && saturday.windowStart === saturdayKey(now)
+        saturdayActive(now) && saturday.windowStart === saturdayKey(now)
           ? { ...saturday, points: roundPoints(saturday.points + points) }
           : saturday;
 
@@ -315,6 +326,35 @@ export const useGoalStore = create<GoalStore>((set, get) => {
               at: new Date().toISOString(),
               kind: "manual" as const,
               label: "Manual adjustment",
+              detail: `Set to ${formatPoints(rounded)}`,
+              points: delta,
+            },
+            ...state.log,
+          ].slice(0, LOG_LIMIT),
+        };
+      });
+      persist();
+    },
+
+    /**
+     * Manually set the Saturday counter directly, bypassing the automatic
+     * weekly-leftover/3 snapshot. Doesn't touch the weekly counter or
+     * stats. Marks the window as already-snapshotted for right now so the
+     * next sync doesn't immediately overwrite it with a fresh /3 snapshot.
+     */
+    setSaturdayPoints(points) {
+      if (!Number.isFinite(points) || points < 0) return;
+      const rounded = roundPoints(points);
+      set((state) => {
+        const delta = roundPoints(rounded - state.saturday.points);
+        return {
+          saturday: { windowStart: saturdayKey(new Date()), points: rounded },
+          log: [
+            {
+              id: crypto.randomUUID(),
+              at: new Date().toISOString(),
+              kind: "manual" as const,
+              label: "Manual adjustment (Saturday)",
               detail: `Set to ${formatPoints(rounded)}`,
               points: delta,
             },

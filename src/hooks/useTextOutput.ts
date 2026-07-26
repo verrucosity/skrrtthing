@@ -13,9 +13,10 @@ async function sync(): Promise<void> {
   const status = useTextOutputStore.getState();
 
   // One file: shows the Saturday goal during its window (Sat 7:50pm - Sun
-  // 7:50pm PT), and the weekly goal the rest of the time.
+  // 7:50pm PT, or anytime "Force Saturday Mode" is on), and the weekly goal
+  // the rest of the time.
   if (settings.weeklyOutputEnabled && settings.weeklyOutputPath.trim()) {
-    const text = isInSaturdayWindow()
+    const text = isInSaturdayWindow() || settings.saturdayForced
       ? renderSaturdayText(state.saturday.points, settings.saturdayOutputTemplate)
       : renderWeeklyText(state.points, settings.weeklyOutputTemplate);
     try {
@@ -44,7 +45,8 @@ export function useTextOutput(): void {
         state.weeklyOutputEnabled !== prev.weeklyOutputEnabled ||
         state.weeklyOutputPath !== prev.weeklyOutputPath ||
         state.weeklyOutputTemplate !== prev.weeklyOutputTemplate ||
-        state.saturdayOutputTemplate !== prev.saturdayOutputTemplate
+        state.saturdayOutputTemplate !== prev.saturdayOutputTemplate ||
+        state.saturdayForced !== prev.saturdayForced
       ) {
         void sync();
       }

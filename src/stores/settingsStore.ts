@@ -12,6 +12,7 @@ const defaults: Settings = {
   weeklyOutputPath: "",
   weeklyOutputTemplate: DEFAULT_WEEKLY_TEMPLATE,
   saturdayOutputTemplate: DEFAULT_SATURDAY_TEMPLATE,
+  saturdayForced: false,
 };
 
 interface SettingsStore extends Settings {
@@ -41,6 +42,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       weeklyOutputPath,
       weeklyOutputTemplate,
       saturdayOutputTemplate,
+      saturdayForced,
     } = get();
     void saveSettings({
       onboardingComplete,
@@ -51,6 +53,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       weeklyOutputPath,
       weeklyOutputTemplate,
       saturdayOutputTemplate,
+      saturdayForced,
     } satisfies Settings);
   },
 }));

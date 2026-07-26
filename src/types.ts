@@ -89,6 +89,12 @@ export interface Settings {
   weeklyOutputPath: string;
   weeklyOutputTemplate: string;
   saturdayOutputTemplate: string;
+  /**
+   * Manual override: forces the Saturday goal active (snapshot, contribution
+   * routing, and the output file) regardless of the actual time. An escape
+   * hatch in case the time-based window ever misfires again.
+   */
+  saturdayForced: boolean;
 }
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";
