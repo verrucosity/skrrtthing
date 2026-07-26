@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { GoalData, LogEntry, SubTier } from "../types";
 import { BITS_PER_POINT, CENTS_PER_POINT, SUB_POINTS, roundPoints } from "../lib/goal";
-import { completedWeeklyGoals, SATURDAY_DIVISOR, weeklyProgress } from "../lib/weeklyGoal";
+import { completedWeeklyGoals, SATURDAY_DIVISOR, WEEKLY_STEP, weeklyProgress } from "../lib/weeklyGoal";
 import { isInSaturdayWindow, saturdayKey, weeklyKey } from "../lib/weeklyWindow";
 import { formatUsd, formatPoints } from "../lib/format";
 import { loadData, saveData } from "../lib/storage";
@@ -70,7 +70,8 @@ function syncSaturdayWindow(
   if (inWindow) {
     const key = saturdayKey(now);
     if (data.saturday.windowStart === key) return null; // already snapshotted this window
-    const weeklyLeft = weeklyProgress(data.points).done;
+    const weeklyStep = useSettingsStore.getState().weeklyStepOverride ?? WEEKLY_STEP;
+    const weeklyLeft = weeklyProgress(data.points, weeklyStep).done;
     return {
       saturday: {
         windowStart: key,
@@ -273,8 +274,10 @@ export const useGoalStore = create<GoalStore>((set, get) => {
         history.unshift({
           start: state.week.start,
           points: state.week.points,
-          goalsCompleted:
-            completedWeeklyGoals(state.points) - completedWeeklyGoals(state.week.startPoints),
+          goalsCompleted: (() => {
+            const step = useSettingsStore.getState().weeklyStepOverride ?? WEEKLY_STEP;
+            return completedWeeklyGoals(state.points, step) - completedWeeklyGoals(state.week.startPoints, step);
+          })(),
         });
       }
       set({

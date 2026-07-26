@@ -279,17 +279,28 @@ function StreamlabsSection() {
 function StartingPointSection() {
   const points = useGoalStore((s) => s.points);
   const setPoints = useGoalStore((s) => s.setPoints);
+  const weeklyStepOverride = useSettingsStore((s) => s.weeklyStepOverride);
+  const update = useSettingsStore((s) => s.update);
   const [value, setValue] = useState(String(points));
   const [saved, setSaved] = useState(false);
+  const [stepValue, setStepValue] = useState(weeklyStepOverride != null ? String(weeklyStepOverride) : "");
 
   const parsed = Number(value);
   const valid = value.trim() !== "" && Number.isFinite(parsed) && parsed >= 0;
+
+  const parsedStep = Number(stepValue);
+  const stepValid = stepValue.trim() === "" || (Number.isFinite(parsedStep) && parsedStep > 0);
 
   function apply() {
     if (!valid) return;
     setPoints(parsed);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function applyStep() {
+    if (!stepValid) return;
+    update({ weeklyStepOverride: stepValue.trim() === "" ? null : parsedStep });
   }
 
   return (
@@ -319,6 +330,26 @@ function StartingPointSection() {
           You're currently at <span className="font-mono text-zinc-300">{points}</span> points.
         </p>
         {saved && <p className="text-xs text-emerald-400">Counter updated.</p>}
+
+        <div className="border-t border-edge pt-4">
+          <div className="flex items-end gap-2">
+            <Input
+              label="Custom denominator (default 57)"
+              value={stepValue}
+              onChange={(e) => setStepValue(e.target.value)}
+              onBlur={applyStep}
+              placeholder="57"
+              inputMode="numeric"
+            />
+            <Button onClick={applyStep} disabled={!stepValid} variant="secondary">
+              {weeklyStepOverride == null ? "Set" : "Update"}
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">
+            Replaces the normal 57-point step everywhere (target, stars, progress bar). Leave blank
+            and set to use the default 57.
+          </p>
+        </div>
       </div>
     </Card>
   );
@@ -328,18 +359,30 @@ function SaturdayOverrideSection() {
   const saturday = useGoalStore((s) => s.saturday);
   const setSaturdayPoints = useGoalStore((s) => s.setSaturdayPoints);
   const saturdayForced = useSettingsStore((s) => s.saturdayForced);
+  const saturdayStepOverride = useSettingsStore((s) => s.saturdayStepOverride);
   const update = useSettingsStore((s) => s.update);
   const [value, setValue] = useState(String(saturday.points));
   const [saved, setSaved] = useState(false);
+  const [stepValue, setStepValue] = useState(
+    saturdayStepOverride != null ? String(saturdayStepOverride) : "",
+  );
 
   const parsed = Number(value);
   const valid = value.trim() !== "" && Number.isFinite(parsed) && parsed >= 0;
+
+  const parsedStep = Number(stepValue);
+  const stepValid = stepValue.trim() === "" || (Number.isFinite(parsedStep) && parsedStep > 0);
 
   function apply() {
     if (!valid) return;
     setSaturdayPoints(parsed);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function applyStep() {
+    if (!stepValid) return;
+    update({ saturdayStepOverride: stepValue.trim() === "" ? null : parsedStep });
   }
 
   return (
@@ -388,6 +431,26 @@ function SaturdayOverrideSection() {
           directly skips the usual weekly-leftover / 3 snapshot math.
         </p>
         {saved && <p className="text-xs text-emerald-400">Saturday counter updated.</p>}
+
+        <div className="border-t border-edge pt-4">
+          <div className="flex items-end gap-2">
+            <Input
+              label="Custom denominator (default 19)"
+              value={stepValue}
+              onChange={(e) => setStepValue(e.target.value)}
+              onBlur={applyStep}
+              placeholder="19"
+              inputMode="numeric"
+            />
+            <Button onClick={applyStep} disabled={!stepValid} variant="secondary">
+              {saturdayStepOverride == null ? "Set" : "Update"}
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">
+            Replaces the normal 19-point step for Saturday's target and stars. Leave blank and set
+            to use the default 19.
+          </p>
+        </div>
       </div>
     </Card>
   );

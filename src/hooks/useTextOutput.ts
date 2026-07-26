@@ -4,6 +4,7 @@ import { useSettingsStore } from "../stores/settingsStore";
 import { useTextOutputStore } from "../stores/textOutputStore";
 import { renderWeeklyText, renderSaturdayText, writeTextFile } from "../lib/textOutput";
 import { isInSaturdayWindow } from "../lib/weeklyWindow";
+import { WEEKLY_STEP, SATURDAY_STEP } from "../lib/weeklyGoal";
 
 const REFRESH_MS = 5000;
 
@@ -17,8 +18,12 @@ async function sync(): Promise<void> {
   // the rest of the time.
   if (settings.weeklyOutputEnabled && settings.weeklyOutputPath.trim()) {
     const text = isInSaturdayWindow() || settings.saturdayForced
-      ? renderSaturdayText(state.saturday.points, settings.saturdayOutputTemplate)
-      : renderWeeklyText(state.points, settings.weeklyOutputTemplate);
+      ? renderSaturdayText(
+          state.saturday.points,
+          settings.saturdayOutputTemplate,
+          settings.saturdayStepOverride ?? SATURDAY_STEP,
+        )
+      : renderWeeklyText(state.points, settings.weeklyOutputTemplate, settings.weeklyStepOverride ?? WEEKLY_STEP);
     try {
       await writeTextFile(settings.weeklyOutputPath.trim(), text);
     } catch (err) {
@@ -46,7 +51,9 @@ export function useTextOutput(): void {
         state.weeklyOutputPath !== prev.weeklyOutputPath ||
         state.weeklyOutputTemplate !== prev.weeklyOutputTemplate ||
         state.saturdayOutputTemplate !== prev.saturdayOutputTemplate ||
-        state.saturdayForced !== prev.saturdayForced
+        state.saturdayForced !== prev.saturdayForced ||
+        state.weeklyStepOverride !== prev.weeklyStepOverride ||
+        state.saturdayStepOverride !== prev.saturdayStepOverride
       ) {
         void sync();
       }

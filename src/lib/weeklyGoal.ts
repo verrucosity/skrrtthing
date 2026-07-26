@@ -11,6 +11,11 @@
  * new contribution during the window adds its full value on top, same as
  * normal, it doesn't get divided again. See goalStore's syncSaturdayWindow
  * for where that one-time snapshot actually happens.
+ *
+ * The step (57 / 19) can be overridden from Settings (see
+ * settingsStore's weeklyStepOverride / saturdayStepOverride) - every
+ * function here takes the step as an optional last argument for that,
+ * falling back to the normal default when not given.
  */
 
 export const WEEKLY_STEP = 57;
@@ -18,37 +23,40 @@ export const SATURDAY_STEP = 19;
 export const SATURDAY_DIVISOR = 3;
 
 /** How many complete weekly goals have been passed. */
-export function completedWeeklyGoals(points: number): number {
-  return Math.floor(points / WEEKLY_STEP);
+export function completedWeeklyGoals(points: number, step: number = WEEKLY_STEP): number {
+  return Math.floor(points / step);
 }
 
-/** The weekly target (57, 114, 171, 228...). */
-export function weeklyTarget(points: number): number {
-  return (completedWeeklyGoals(points) + 1) * WEEKLY_STEP;
+/** The weekly target (57, 114, 171, 228... or a custom step). */
+export function weeklyTarget(points: number, step: number = WEEKLY_STEP): number {
+  return (completedWeeklyGoals(points, step) + 1) * step;
 }
 
-/** Stars for completed weekly goals, one per 57 point goal passed. */
-export function weeklyStars(points: number): string {
-  return "*".repeat(completedWeeklyGoals(points));
+/** Stars for completed weekly goals, one per step passed. */
+export function weeklyStars(points: number, step: number = WEEKLY_STEP): string {
+  return "*".repeat(completedWeeklyGoals(points, step));
 }
 
-/** Progress through the current weekly goal (0..57). */
-export function weeklyProgress(points: number): { done: number; ratio: number } {
-  const done = points - completedWeeklyGoals(points) * WEEKLY_STEP;
-  return { done, ratio: done / WEEKLY_STEP };
+/** Progress through the current weekly goal (0..step). */
+export function weeklyProgress(
+  points: number,
+  step: number = WEEKLY_STEP,
+): { done: number; ratio: number } {
+  const done = points - completedWeeklyGoals(points, step) * step;
+  return { done, ratio: done / step };
 }
 
 /** How many complete Saturday goals a given Saturday counter has passed. */
-export function completedSaturdayGoals(saturdayPoints: number): number {
-  return Math.floor(saturdayPoints / SATURDAY_STEP);
+export function completedSaturdayGoals(saturdayPoints: number, step: number = SATURDAY_STEP): number {
+  return Math.floor(saturdayPoints / step);
 }
 
-/** The Saturday target (19, 38, 57, 76...) based on its own running counter. */
-export function saturdayTarget(saturdayPoints: number): number {
-  return (completedSaturdayGoals(saturdayPoints) + 1) * SATURDAY_STEP;
+/** The Saturday target (19, 38, 57, 76... or a custom step) based on its own running counter. */
+export function saturdayTarget(saturdayPoints: number, step: number = SATURDAY_STEP): number {
+  return (completedSaturdayGoals(saturdayPoints, step) + 1) * step;
 }
 
-/** Stars for completed Saturday goals, one per 19 point goal passed during the window. */
-export function saturdayStars(saturdayPoints: number): string {
-  return "*".repeat(completedSaturdayGoals(saturdayPoints));
+/** Stars for completed Saturday goals, one per step passed during the window. */
+export function saturdayStars(saturdayPoints: number, step: number = SATURDAY_STEP): string {
+  return "*".repeat(completedSaturdayGoals(saturdayPoints, step));
 }

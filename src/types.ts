@@ -95,6 +95,13 @@ export interface Settings {
    * hatch in case the time-based window ever misfires again.
    */
   saturdayForced: boolean;
+  /**
+   * Custom denominator override: replaces the normal 57-point weekly step
+   * (or 19-point Saturday step) with a custom number. Stars and targets
+   * recalculate off whichever step is active. null means "use the default."
+   */
+  weeklyStepOverride: number | null;
+  saturdayStepOverride: number | null;
 }
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";

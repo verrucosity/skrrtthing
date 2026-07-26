@@ -1,6 +1,7 @@
 import { useGoalStore } from "../../stores/goalStore";
+import { useSettingsStore } from "../../stores/settingsStore";
 import { useNow } from "../../hooks/useNow";
-import { completedWeeklyGoals } from "../../lib/weeklyGoal";
+import { completedWeeklyGoals, WEEKLY_STEP } from "../../lib/weeklyGoal";
 import { nextWeeklyStart } from "../../lib/weeklyWindow";
 import { formatDate, formatPoints, formatUntil } from "../../lib/format";
 import { Card } from "../ui/Card";
@@ -8,9 +9,10 @@ import { Card } from "../ui/Card";
 export function WeeklyCard() {
   const week = useGoalStore((s) => s.week);
   const points = useGoalStore((s) => s.points);
+  const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
   const now = useNow();
 
-  const goalsThisWeek = completedWeeklyGoals(points) - completedWeeklyGoals(week.startPoints);
+  const goalsThisWeek = completedWeeklyGoals(points, weeklyStep) - completedWeeklyGoals(week.startPoints, weeklyStep);
 
   return (
     <Card title="This Week">

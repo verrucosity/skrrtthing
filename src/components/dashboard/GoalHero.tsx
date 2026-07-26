@@ -6,9 +6,11 @@ import {
   completedWeeklyGoals,
   saturdayStars,
   saturdayTarget,
+  SATURDAY_STEP,
   weeklyProgress,
   weeklyStars,
   weeklyTarget,
+  WEEKLY_STEP,
 } from "../../lib/weeklyGoal";
 import { isInSaturdayWindow } from "../../lib/weeklyWindow";
 import { formatPoints, formatPointsExact } from "../../lib/format";
@@ -18,12 +20,14 @@ export function GoalHero() {
   const points = useGoalStore((s) => s.points);
   const saturday = useGoalStore((s) => s.saturday);
   const saturdayForced = useSettingsStore((s) => s.saturdayForced);
+  const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
+  const saturdayStep = useSettingsStore((s) => s.saturdayStepOverride) ?? SATURDAY_STEP;
   const now = useNow();
 
-  const target = weeklyTarget(points);
-  const { done, ratio } = weeklyProgress(points);
-  const completed = completedWeeklyGoals(points);
-  const saturdayCompleted = completedSaturdayGoals(saturday.points);
+  const target = weeklyTarget(points, weeklyStep);
+  const { done, ratio } = weeklyProgress(points, weeklyStep);
+  const completed = completedWeeklyGoals(points, weeklyStep);
+  const saturdayCompleted = completedSaturdayGoals(saturday.points, saturdayStep);
   const inSaturdayWindow = isInSaturdayWindow(now) || saturdayForced;
 
   return (
@@ -42,7 +46,7 @@ export function GoalHero() {
             className="pb-1.5 font-mono text-2xl tracking-widest text-accent-hover"
             title={`${completed} weekly goal${completed === 1 ? "" : "s"} completed`}
           >
-            {weeklyStars(points)}
+            {weeklyStars(points, weeklyStep)}
           </span>
         )}
       </div>
@@ -54,9 +58,9 @@ export function GoalHero() {
         <ProgressBar ratio={ratio} />
         <div className="mt-2 flex justify-between text-xs text-zinc-500">
           <span>
-            {formatPoints(done)} / 57 toward goal #{completed + 1}
+            {formatPoints(done)} / {weeklyStep} toward goal #{completed + 1}
           </span>
-          <span>{formatPoints(57 - done)} to go</span>
+          <span>{formatPoints(weeklyStep - done)} to go</span>
         </div>
       </div>
 
@@ -72,14 +76,14 @@ export function GoalHero() {
                 : "text-2xl font-semibold tabular-nums text-zinc-600"
             }
           >
-            {formatPoints(saturday.points)} / {saturdayTarget(saturday.points)}
+            {formatPoints(saturday.points)} / {saturdayTarget(saturday.points, saturdayStep)}
           </p>
           {saturdayCompleted > 0 && (
             <span
               className="font-mono text-lg tracking-widest text-accent-hover"
               title={`${saturdayCompleted} Saturday goal${saturdayCompleted === 1 ? "" : "s"} completed`}
             >
-              {saturdayStars(saturday.points)}
+              {saturdayStars(saturday.points, saturdayStep)}
             </span>
           )}
         </div>

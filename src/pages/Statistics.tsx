@@ -3,13 +3,15 @@ import { Page } from "../components/layout/Page";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { useGoalStore } from "../stores/goalStore";
-import { completedWeeklyGoals } from "../lib/weeklyGoal";
+import { useSettingsStore } from "../stores/settingsStore";
+import { completedWeeklyGoals, WEEKLY_STEP } from "../lib/weeklyGoal";
 import { formatDate, formatNumber, formatPoints, formatUsd } from "../lib/format";
 
 export function Statistics() {
   const stats = useGoalStore((s) => s.stats);
   const points = useGoalStore((s) => s.points);
   const history = useGoalStore((s) => s.history);
+  const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
 
   return (
     <Page title="Statistics" description="Everything you've racked up so far, week by week.">
@@ -28,8 +30,8 @@ export function Statistics() {
         <StatCard label="Lifetime Contributions" value={formatPoints(points)} sub="points" />
         <StatCard
           label="Weekly Goals Completed"
-          value={formatNumber(completedWeeklyGoals(points))}
-          sub="groups of 57"
+          value={formatNumber(completedWeeklyGoals(points, weeklyStep))}
+          sub={`groups of ${weeklyStep}`}
         />
       </div>
 
