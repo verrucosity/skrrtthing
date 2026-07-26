@@ -320,7 +320,7 @@ function ObsStep({ onNext, onBack }: { onNext: () => void; onBack: () => void })
         {paths && <CopyField label="Goal file" value={paths.weekly} />}
         <p className="text-xs text-zinc-500">
           Shows the weekly goal (57, 114, 171...) most of the time, and switches over to the
-          Saturday goal (19, 38, 57...) during the Saturday 8pm-Sunday 7:59pm PT window.
+          Saturday goal (19, 38, 57...) during the Saturday 7:50pm-Sunday 7:50pm PT window.
         </p>
         <div className="rounded-md bg-raised p-3 text-xs text-zinc-400">
           <p className="mb-1 font-medium text-zinc-300">In OBS:</p>

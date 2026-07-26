@@ -355,7 +355,7 @@ function WeeklyOutputSection() {
           Writes the current goal to a single text file, updating every time it changes. In OBS,
           add a <span className="text-zinc-400">Text (GDI+)</span> source, turn on{" "}
           <span className="text-zinc-400">Read from file</span>, and point it at this file. During
-          the Saturday 8pm to Sunday 7:59pm PT window it switches over to the Saturday goal, then
+          the Saturday 7:50pm to Sunday 7:50pm PT window it switches over to the Saturday goal, then
           switches back to the weekly goal once the window closes.
         </p>
         <Input
@@ -386,7 +386,7 @@ function WeeklyOutputSection() {
           {inWindow ? (
             <span className="ml-2 text-emerald-400">(showing Saturday goal now)</span>
           ) : (
-            <span className="ml-2 text-zinc-600">(showing weekly goal, Saturday takes over at 8pm PT)</span>
+            <span className="ml-2 text-zinc-600">(showing weekly goal, Saturday takes over at 7:50pm PT)</span>
           )}
         </p>
         {enabled && writeError && <p className="text-xs text-red-400">{writeError}</p>}

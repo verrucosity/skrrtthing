@@ -1,4 +1,4 @@
-# skrrt goal thingy
+# SkrrtMath
 
 A little desktop app that tracks a recurring Twitch community goal. Bits,
 subs and Streamlabs donations all feed one running counter, split into two
@@ -7,8 +7,8 @@ goals: a weekly one and a Saturday one.
 **Weekly goal** climbs in steps of 57 (57, 114, 171, 228...) and resets every
 Sunday at 8pm Pacific.
 
-**Saturday goal** only shows up during a window from Saturday 8pm to Sunday
-7:59pm Pacific. It takes your weekly progress, subtracts whatever weekly
+**Saturday goal** only shows up during a window from Saturday 7:50pm to Sunday
+7:50pm Pacific. It takes your weekly progress, subtracts whatever weekly
 goals you've already finished, divides by 3, and shows that out of 19 (which
 climbs to 38, 57, 76 and so on the same way).
 

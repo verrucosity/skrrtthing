@@ -29,7 +29,7 @@ fn download_and_run_installer(app: tauri::AppHandle, url: String) -> Result<(), 
         .read_to_end(&mut bytes)
         .map_err(|e| e.to_string())?;
 
-    let dest = std::env::temp_dir().join("skrrt-goal-thingy-update-setup.exe");
+    let dest = std::env::temp_dir().join("skrrtmath-update-setup.exe");
     fs::write(&dest, &bytes).map_err(|e| e.to_string())?;
 
     std::process::Command::new(&dest)

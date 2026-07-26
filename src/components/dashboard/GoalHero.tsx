@@ -85,7 +85,7 @@ export function GoalHero() {
           {formatPointsExact(saturday.points)} exact
         </p>
         {!inSaturdayWindow && (
-          <p className="mt-1 text-xs text-zinc-600">Activates Saturday 8pm PT</p>
+          <p className="mt-1 text-xs text-zinc-600">Activates Saturday 7:50pm PT</p>
         )}
       </div>
     </section>

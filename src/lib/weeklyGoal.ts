@@ -5,7 +5,7 @@
  * Its stats window resets Sunday 8pm Pacific, but the number itself never
  * goes back down.
  *
- * SATURDAY GOAL: 19, 38, 57, 76... The moment Saturday 8pm Pacific hits,
+ * SATURDAY GOAL: 19, 38, 57, 76... The moment Saturday 7:50pm Pacific hits,
  * whatever the weekly "left number" is at that instant gets divided by 3
  * once, and that's where Saturday starts counting from. After that, every
  * new contribution during the window adds its full value on top, same as
