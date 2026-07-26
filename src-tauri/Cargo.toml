@@ -1,6 +1,6 @@
 [package]
 name = "goaldock"
-version = "0.1.6"
+version = "0.1.7"
 description = "Weekly community goal tracker for Twitch"
 authors = ["verrucosity"]
 license = "MIT"
