@@ -10,7 +10,7 @@ import {
   weeklyTarget,
 } from "../../lib/weeklyGoal";
 import { isInSaturdayWindow } from "../../lib/weeklyWindow";
-import { formatPoints } from "../../lib/format";
+import { formatPoints, formatPointsExact } from "../../lib/format";
 import { ProgressBar } from "../ui/ProgressBar";
 
 export function GoalHero() {
@@ -44,6 +44,9 @@ export function GoalHero() {
           </span>
         )}
       </div>
+      <p className="mt-1 text-center text-xs text-zinc-600" title="Exact stored value, only you see this">
+        {formatPointsExact(points)} exact
+      </p>
 
       <div className="mx-auto mt-6 max-w-xl">
         <ProgressBar ratio={ratio} />
@@ -78,6 +81,9 @@ export function GoalHero() {
             </span>
           )}
         </div>
+        <p className="mt-1 text-xs text-zinc-600" title="Exact stored value, only you see this">
+          {formatPointsExact(saturday.points)} exact
+        </p>
         {!inSaturdayWindow && (
           <p className="mt-1 text-xs text-zinc-600">Activates Saturday 8pm PT</p>
         )}
