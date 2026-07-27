@@ -113,21 +113,25 @@ export const useGoalStore = create<GoalStore>((set, get) => {
       const afterSync = satSync ? { ...state, ...satSync } : state;
       const changes = patch(afterSync);
 
-      // Add the full, undivided contribution on top of Saturday's counter,
-      // but only once it's actually been snapshotted for this window.
+      // Once Saturday has actually been snapshotted for this window, a
+      // contribution counts ONLY toward Saturday. Weekly freezes at
+      // whatever it was when the window opened, it doesn't get this
+      // contribution at all, not even after Saturday closes.
       const saturday = changes.saturday ?? afterSync.saturday;
-      const saturdayNext =
-        saturdayActive(now) && saturday.windowStart === saturdayKey(now)
-          ? { ...saturday, points: roundPoints(saturday.points + points) }
-          : saturday;
+      const inSnapshottedSaturday = saturdayActive(now) && saturday.windowStart === saturdayKey(now);
+      const saturdayNext = inSnapshottedSaturday
+        ? { ...saturday, points: roundPoints(saturday.points + points) }
+        : saturday;
 
       return {
         ...changes,
-        points: roundPoints(afterSync.points + points),
+        points: inSnapshottedSaturday ? afterSync.points : roundPoints(afterSync.points + points),
         week: {
           ...afterSync.week,
           ...changes.week,
-          points: roundPoints(afterSync.week.points + points),
+          points: inSnapshottedSaturday
+            ? afterSync.week.points
+            : roundPoints(afterSync.week.points + points),
         },
         saturday: saturdayNext,
         log: [

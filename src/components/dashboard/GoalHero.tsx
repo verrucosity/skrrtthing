@@ -33,7 +33,7 @@ export function GoalHero() {
   return (
     <section className="rounded-lg border border-edge bg-surface px-6 py-7">
       <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Weekly Goal
+        Weekly Goal {inSaturdayWindow && <span className="text-accent-hover">(frozen, Saturday's active)</span>}
       </p>
       <div className="flex items-end justify-center gap-3">
         <span className="text-6xl font-bold tabular-nums tracking-tight text-zinc-50">
