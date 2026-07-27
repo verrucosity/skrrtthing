@@ -93,7 +93,10 @@ function isAtOrPastWindowStart(hour: number, minute: number): boolean {
 /** Most recent Sunday 8 PM PT at or before `now`. */
 export function weeklyStart(now: Date = new Date()): Date {
   const pt = getPacificParts(now);
-  const daysSinceSunday = pt.hour >= 20 || pt.weekday !== 0 ? pt.weekday : 0;
+  // On Sunday itself: if it's already past 8pm, today is the reset day (0
+  // days back). If it's still before 8pm, this week's reset hasn't
+  // happened yet, so the most recent one was last Sunday (7 days back).
+  const daysSinceSunday = pt.weekday === 0 ? (pt.hour >= 20 ? 0 : 7) : pt.weekday;
   const anchor = pacificToUtc(pt.year, pt.month, pt.day, 0, 0);
   const backOffMs = daysSinceSunday * 24 * 60 * 60 * 1000;
   const sundayMidnightUtc = new Date(anchor.getTime() - backOffMs);
@@ -118,7 +121,9 @@ export function saturdayStart(now: Date = new Date()): Date {
     return pacificToUtc(pt.year, pt.month, pt.day, SATURDAY_WINDOW_HOUR, SATURDAY_WINDOW_MINUTE);
   }
 
-  const daysSinceSaturday = (pt.weekday + 1) % 7;
+  // On Saturday itself but before the window opens (7:50pm), the most
+  // recent past window start was last Saturday (7 days back), not today.
+  const daysSinceSaturday = pt.weekday === 6 ? 7 : (pt.weekday + 1) % 7;
   const backOffMs = daysSinceSaturday * 24 * 60 * 60 * 1000;
   const saturdayMidnightUtc = new Date(pacificToUtc(pt.year, pt.month, pt.day, 0, 0).getTime() - backOffMs);
   const satPt = getPacificParts(saturdayMidnightUtc);
