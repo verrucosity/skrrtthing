@@ -1,7 +1,7 @@
 {
   "name": "skrrtmath",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Weekly community goal tracker for Twitch streamers",
   "type": "module",
   "scripts": {

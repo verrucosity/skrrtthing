@@ -13,8 +13,8 @@ async function sync(): Promise<void> {
   const settings = useSettingsStore.getState();
   const status = useTextOutputStore.getState();
 
-  // One file: shows the Saturday goal during its window (Sat 7:50pm - Sun
-  // 7:50pm PT, or anytime "Force Saturday Mode" is on), and the weekly goal
+  // One file: shows the Saturday goal during its window (Sat 7pm - Sun
+  // 7pm PT, or anytime "Force Saturday Mode" is on), and the weekly goal
   // the rest of the time.
   if (settings.weeklyOutputEnabled && settings.weeklyOutputPath.trim()) {
     const text = isInSaturdayWindow() || settings.saturdayForced
@@ -37,8 +37,8 @@ async function sync(): Promise<void> {
 /**
  * Keeps the OBS text file in sync: writes immediately when the counter or
  * output settings change, and refreshes every few seconds. The file itself
- * switches content at the Saturday window boundary (Sat 7:50pm - Sun
- * 7:50pm PT) rather than writing to a second file.
+ * switches content at the Saturday window boundary (Sat 7pm - Sun
+ * 7pm PT) rather than writing to a second file.
  */
 export function useTextOutput(): void {
   useEffect(() => {

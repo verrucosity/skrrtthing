@@ -2,9 +2,9 @@
  * Time windows are in Pacific time (PT):
  *
  * WEEKLY: resets every Sunday 8:00 PM PT (display switches to the Saturday
- * goal at 7:50 PM PT on Saturdays, see below, even though the weekly
+ * goal at 7 PM PT on Saturdays, see below, even though the weekly
  * counter itself keeps accumulating underneath)
- * SATURDAY: Saturday 7:50 PM PT → Sunday 7:50 PM PT (resets Saturday 7:50 PM)
+ * SATURDAY: Saturday 7 PM PT → Sunday 7 PM PT (resets Saturday 7 PM)
  *
  * All of this is computed from the real Pacific timezone via Intl, not a
  * hardcoded UTC offset - that avoids two bugs a fixed offset has: it
@@ -28,7 +28,7 @@ const WEEKDAY_INDEX: Record<string, number> = {
 };
 
 const SATURDAY_WINDOW_HOUR = 19;
-const SATURDAY_WINDOW_MINUTE = 50;
+const SATURDAY_WINDOW_MINUTE = 0;
 
 interface PacificParts {
   year: number;
@@ -85,7 +85,7 @@ function pacificToUtc(year: number, month: number, day: number, hour: number, mi
   return new Date(guess - offsetMinutes * 60 * 1000);
 }
 
-/** True once `hour:minute` is at or past the Saturday window's start time (7:50 PM). */
+/** True once `hour:minute` is at or past the Saturday window's start time (7 PM). */
 function isAtOrPastWindowStart(hour: number, minute: number): boolean {
   return hour > SATURDAY_WINDOW_HOUR || (hour === SATURDAY_WINDOW_HOUR && minute >= SATURDAY_WINDOW_MINUTE);
 }
@@ -112,7 +112,7 @@ export function nextWeeklyStart(now: Date = new Date()): Date {
   return pacificToUtc(pt.year, pt.month, pt.day, 20, 0);
 }
 
-/** Most recent Saturday 7:50 PM PT at or before `now`. */
+/** Most recent Saturday 7 PM PT at or before `now`. */
 export function saturdayStart(now: Date = new Date()): Date {
   const pt = getPacificParts(now);
   const isSaturdayInWindow = pt.weekday === 6 && isAtOrPastWindowStart(pt.hour, pt.minute);
@@ -121,7 +121,7 @@ export function saturdayStart(now: Date = new Date()): Date {
     return pacificToUtc(pt.year, pt.month, pt.day, SATURDAY_WINDOW_HOUR, SATURDAY_WINDOW_MINUTE);
   }
 
-  // On Saturday itself but before the window opens (7:50pm), the most
+  // On Saturday itself but before the window opens (7pm), the most
   // recent past window start was last Saturday (7 days back), not today.
   const daysSinceSaturday = pt.weekday === 6 ? 7 : (pt.weekday + 1) % 7;
   const backOffMs = daysSinceSaturday * 24 * 60 * 60 * 1000;
@@ -130,7 +130,7 @@ export function saturdayStart(now: Date = new Date()): Date {
   return pacificToUtc(satPt.year, satPt.month, satPt.day, SATURDAY_WINDOW_HOUR, SATURDAY_WINDOW_MINUTE);
 }
 
-/** Next Saturday 7:50 PM PT. */
+/** Next Saturday 7 PM PT. */
 export function nextSaturdayStart(now: Date = new Date()): Date {
   const start = saturdayStart(now);
   const sevenDaysLater = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -138,10 +138,10 @@ export function nextSaturdayStart(now: Date = new Date()): Date {
   return pacificToUtc(pt.year, pt.month, pt.day, SATURDAY_WINDOW_HOUR, SATURDAY_WINDOW_MINUTE);
 }
 
-/** Is it currently in the Saturday 7:50 PM - Sunday 7:50 PM PT window? */
+/** Is it currently in the Saturday 7 PM - Sunday 7 PM PT window? */
 export function isInSaturdayWindow(now: Date = new Date()): boolean {
   const pt = getPacificParts(now);
-  // Saturday at/past 7:50 PM, or Sunday before 7:50 PM
+  // Saturday at/past 7 PM, or Sunday before 7 PM
   return (
     (pt.weekday === 6 && isAtOrPastWindowStart(pt.hour, pt.minute)) ||
     (pt.weekday === 0 && !isAtOrPastWindowStart(pt.hour, pt.minute))

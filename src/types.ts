@@ -83,7 +83,7 @@ export interface Settings {
   /**
    * Single OBS text file output: shows the weekly goal (57, 114, 171...)
    * most of the time, switching to the Saturday goal (19, 38, 57...) during
-   * the Saturday 7:50pm - Sun 7:50pm PT window.
+   * the Saturday 7pm - Sun 7pm PT window.
    */
   weeklyOutputEnabled: boolean;
   weeklyOutputPath: string;

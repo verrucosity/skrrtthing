@@ -26,7 +26,7 @@ export function renderWeeklyText(points: number, template: string, step: number 
 }
 
 /**
- * Render the Saturday goal text (only active Sat 7:50pm - Sun 7:50pm PT).
+ * Render the Saturday goal text (only active Sat 7pm - Sun 7pm PT).
  * `saturdayPoints` is the independent Saturday counter from goalStore, not
  * derived live from the weekly total, so this stays exact even after the
  * one-time divide-by-3 snapshot. A star gets added every time Saturday's
