@@ -45,8 +45,27 @@ export class TwitchEventSub {
   private reconnectAttempts = 0;
   private intentionalClose = false;
   private seenMessageIds = new Set<string>();
+  private recentSubUsers = new Map<string, number>();
 
   constructor(private callbacks: EventSubCallbacks) {}
+
+  /**
+   * Twitch can fire both channel.subscribe and channel.subscription.message
+   * for the same underlying resub (each with a different message_id, so the
+   * seenMessageIds check alone doesn't catch it), double-counting one sub
+   * as two. If the same user already triggered a sub event in the last few
+   * minutes, treat this one as the duplicate and skip it.
+   */
+  private isDuplicateSubEvent(userName: string): boolean {
+    const now = Date.now();
+    const windowMs = 5 * 60 * 1000;
+    for (const [user, at] of this.recentSubUsers) {
+      if (now - at > windowMs) this.recentSubUsers.delete(user);
+    }
+    const last = this.recentSubUsers.get(userName);
+    this.recentSubUsers.set(userName, now);
+    return last !== undefined && now - last <= windowMs;
+  }
 
   connect(auth: TwitchAuth): void {
     this.auth = auth;
@@ -170,11 +189,13 @@ export class TwitchEventSub {
       case "channel.subscribe": {
         const e = event as unknown as SubscribeEvent;
         if (e.is_gift) break; // counted by channel.subscription.gift
+        if (this.isDuplicateSubEvent(e.user_name)) break;
         this.callbacks.onEvent({ type: "sub", tier: e.tier, user: e.user_name, isResub: false });
         break;
       }
       case "channel.subscription.message": {
         const e = event as unknown as ResubEvent;
+        if (this.isDuplicateSubEvent(e.user_name)) break;
         this.callbacks.onEvent({
           type: "sub",
           tier: e.tier,
