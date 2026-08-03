@@ -10,8 +10,11 @@ import { formatDate, formatNumber, formatPoints, formatUsd } from "../lib/format
 export function Statistics() {
   const stats = useGoalStore((s) => s.stats);
   const points = useGoalStore((s) => s.points);
+  const week = useGoalStore((s) => s.week);
   const history = useGoalStore((s) => s.history);
   const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
+  const totalGoalsCompleted =
+    history.reduce((sum, w) => sum + w.goalsCompleted, 0) + completedWeeklyGoals(week.points, weeklyStep);
 
   return (
     <Page title="Statistics" description="Everything you've racked up so far, week by week.">
@@ -30,7 +33,7 @@ export function Statistics() {
         <StatCard label="Lifetime Contributions" value={formatPoints(points)} sub="points" />
         <StatCard
           label="Weekly Goals Completed"
-          value={formatNumber(completedWeeklyGoals(points, weeklyStep))}
+          value={formatNumber(totalGoalsCompleted)}
           sub={`groups of ${weeklyStep}`}
         />
       </div>

@@ -1,9 +1,11 @@
 /**
  * Two goals that track differently:
  *
- * WEEKLY GOAL: 57, 114, 171, 228... forever, off the lifetime point total.
- * Its stats window resets Sunday 7pm Pacific, but the number itself never
- * goes back down.
+ * WEEKLY GOAL: 57, 114, 171, 228... (climbing in 57-blocks within a single
+ * week, resetting to 0 every Sunday 7pm Pacific along with everything
+ * else). Driven by goalStore's week.points, not the lifetime total - the
+ * lifetime total (points) still exists separately for the Statistics page,
+ * it just doesn't drive the live goal widget anymore.
  *
  * SATURDAY GOAL: 19, 38, 57, 76... The moment Saturday 7pm Pacific hits,
  * whatever the weekly "left number" is at that instant gets divided by 3

@@ -8,11 +8,10 @@ import { Card } from "../ui/Card";
 
 export function WeeklyCard() {
   const week = useGoalStore((s) => s.week);
-  const points = useGoalStore((s) => s.points);
   const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
   const now = useNow();
 
-  const goalsThisWeek = completedWeeklyGoals(points, weeklyStep) - completedWeeklyGoals(week.startPoints, weeklyStep);
+  const goalsThisWeek = completedWeeklyGoals(week.points, weeklyStep);
 
   return (
     <Card title="This Week">

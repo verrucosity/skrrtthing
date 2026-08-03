@@ -17,16 +17,16 @@ import { formatPoints, formatPointsExact } from "../../lib/format";
 import { ProgressBar } from "../ui/ProgressBar";
 
 export function GoalHero() {
-  const points = useGoalStore((s) => s.points);
+  const weekPoints = useGoalStore((s) => s.week.points);
   const saturday = useGoalStore((s) => s.saturday);
   const saturdayForced = useSettingsStore((s) => s.saturdayForced);
   const weeklyStep = useSettingsStore((s) => s.weeklyStepOverride) ?? WEEKLY_STEP;
   const saturdayStep = useSettingsStore((s) => s.saturdayStepOverride) ?? SATURDAY_STEP;
   const now = useNow();
 
-  const target = weeklyTarget(points, weeklyStep);
-  const { done, ratio } = weeklyProgress(points, weeklyStep);
-  const completed = completedWeeklyGoals(points, weeklyStep);
+  const target = weeklyTarget(weekPoints, weeklyStep);
+  const { done, ratio } = weeklyProgress(weekPoints, weeklyStep);
+  const completed = completedWeeklyGoals(weekPoints, weeklyStep);
   const saturdayCompleted = completedSaturdayGoals(saturday.points, saturdayStep);
   const inSaturdayWindow = isInSaturdayWindow(now) || saturdayForced;
 
@@ -37,21 +37,21 @@ export function GoalHero() {
       </p>
       <div className="flex items-end justify-center gap-3">
         <span className="text-6xl font-bold tabular-nums tracking-tight text-zinc-50">
-          {formatPoints(points)}
+          {formatPoints(weekPoints)}
           <span className="mx-3 text-zinc-600">/</span>
           {formatPoints(target)}
         </span>
         {completed > 0 && (
           <span
             className="pb-1.5 font-mono text-2xl tracking-widest text-accent-hover"
-            title={`${completed} weekly goal${completed === 1 ? "" : "s"} completed`}
+            title={`${completed} weekly goal${completed === 1 ? "" : "s"} completed this week`}
           >
-            {weeklyStars(points, weeklyStep)}
+            {weeklyStars(weekPoints, weeklyStep)}
           </span>
         )}
       </div>
       <p className="mt-1 text-center text-xs text-zinc-600" title="Exact stored value, only you see this">
-        {formatPointsExact(points)} exact
+        {formatPointsExact(weekPoints)} exact
       </p>
 
       <div className="mx-auto mt-6 max-w-xl">

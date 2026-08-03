@@ -62,7 +62,7 @@ function tierLabel(tier: SubTier): string {
  * Saturday starts clean.
  */
 function syncSaturdayWindow(
-  data: Pick<GoalData, "points" | "saturday">,
+  data: Pick<GoalData, "week" | "saturday">,
   now: Date,
 ): Partial<GoalData> | null {
   const inWindow = saturdayActive(now);
@@ -71,7 +71,7 @@ function syncSaturdayWindow(
     const key = saturdayKey(now);
     if (data.saturday.windowStart === key) return null; // already snapshotted this window
     const weeklyStep = useSettingsStore.getState().weeklyStepOverride ?? WEEKLY_STEP;
-    const weeklyLeft = weeklyProgress(data.points, weeklyStep).done;
+    const weeklyLeft = weeklyProgress(data.week.points, weeklyStep).done;
     return {
       saturday: {
         windowStart: key,
@@ -278,10 +278,10 @@ export const useGoalStore = create<GoalStore>((set, get) => {
         history.unshift({
           start: state.week.start,
           points: state.week.points,
-          goalsCompleted: (() => {
-            const step = useSettingsStore.getState().weeklyStepOverride ?? WEEKLY_STEP;
-            return completedWeeklyGoals(state.points, step) - completedWeeklyGoals(state.week.startPoints, step);
-          })(),
+          goalsCompleted: completedWeeklyGoals(
+            state.week.points,
+            useSettingsStore.getState().weeklyStepOverride ?? WEEKLY_STEP,
+          ),
         });
       }
       set({
@@ -309,23 +309,24 @@ export const useGoalStore = create<GoalStore>((set, get) => {
     },
 
     /**
-     * Manually set the lifetime counter to a specific value, e.g. when
+     * Manually set the weekly goal counter to a specific value, e.g. when
      * first linking a channel that already has an existing goal in
-     * progress. Logs the change so it's visible in the Event Log, but
-     * doesn't touch stats (bits/subs/donations totals) since this isn't a
-     * real contribution, just a starting point correction. Accepts
-     * decimals since bits can leave the counter at a fractional value.
-     * Also clears any Saturday snapshot so it gets recomputed fresh off
-     * the corrected number next time the window is active.
+     * progress, or correcting it mid-week. This is the number the goal
+     * widget actually displays. Logs the change so it's visible in the
+     * Event Log, but doesn't touch stats (bits/subs/donations totals)
+     * since this isn't a real contribution, just a correction. Also nudges
+     * the lifetime total by the same delta so it stays consistent, and
+     * clears any Saturday snapshot so it gets recomputed fresh off the
+     * corrected number next time the window is active.
      */
     setPoints(points) {
       if (!Number.isFinite(points) || points < 0) return;
       const rounded = roundPoints(points);
       set((state) => {
-        const delta = roundPoints(rounded - state.points);
+        const delta = roundPoints(rounded - state.week.points);
         return {
-          points: rounded,
-          week: { ...state.week, points: roundPoints(state.week.points + delta) },
+          points: roundPoints(state.points + delta),
+          week: { ...state.week, points: rounded },
           saturday: { windowStart: null, points: 0 },
           log: [
             {

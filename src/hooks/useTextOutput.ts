@@ -23,7 +23,7 @@ async function sync(): Promise<void> {
           settings.saturdayOutputTemplate,
           settings.saturdayStepOverride ?? SATURDAY_STEP,
         )
-      : renderWeeklyText(state.points, settings.weeklyOutputTemplate, settings.weeklyStepOverride ?? WEEKLY_STEP);
+      : renderWeeklyText(state.week.points, settings.weeklyOutputTemplate, settings.weeklyStepOverride ?? WEEKLY_STEP);
     try {
       await writeTextFile(settings.weeklyOutputPath.trim(), text);
     } catch (err) {
@@ -43,7 +43,7 @@ async function sync(): Promise<void> {
 export function useTextOutput(): void {
   useEffect(() => {
     const unsubGoal = useGoalStore.subscribe((state, prev) => {
-      if (state.points !== prev.points || state.saturday !== prev.saturday) void sync();
+      if (state.week.points !== prev.week.points || state.saturday !== prev.saturday) void sync();
     });
     const unsubSettings = useSettingsStore.subscribe((state, prev) => {
       if (
