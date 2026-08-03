@@ -258,9 +258,9 @@ function StreamlabsStep({ onNext, onBack }: { onNext: () => void; onBack: () => 
 }
 
 function StartingPointStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
-  const points = useGoalStore((s) => s.points);
+  const weekPoints = useGoalStore((s) => s.week.points);
   const setPoints = useGoalStore((s) => s.setPoints);
-  const [value, setValue] = useState(String(points));
+  const [value, setValue] = useState(String(weekPoints));
 
   const parsed = Number(value);
   const valid = value.trim() !== "" && Number.isFinite(parsed) && parsed >= 0;

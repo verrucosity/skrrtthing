@@ -277,11 +277,11 @@ function StreamlabsSection() {
 }
 
 function StartingPointSection() {
-  const points = useGoalStore((s) => s.points);
+  const weekPoints = useGoalStore((s) => s.week.points);
   const setPoints = useGoalStore((s) => s.setPoints);
   const weeklyStepOverride = useSettingsStore((s) => s.weeklyStepOverride);
   const update = useSettingsStore((s) => s.update);
-  const [value, setValue] = useState(String(points));
+  const [value, setValue] = useState(String(weekPoints));
   const [saved, setSaved] = useState(false);
   const [stepValue, setStepValue] = useState(weeklyStepOverride != null ? String(weeklyStepOverride) : "");
 
@@ -322,12 +322,12 @@ function StartingPointSection() {
             placeholder="0"
             inputMode="numeric"
           />
-          <Button onClick={apply} disabled={!valid || parsed === points} variant="primary">
+          <Button onClick={apply} disabled={!valid || parsed === weekPoints} variant="primary">
             Set
           </Button>
         </div>
         <p className="text-xs text-zinc-500">
-          You're currently at <span className="font-mono text-zinc-300">{points}</span> points.
+          You're currently at <span className="font-mono text-zinc-300">{weekPoints}</span> points.
         </p>
         {saved && <p className="text-xs text-emerald-400">Counter updated.</p>}
 
@@ -462,11 +462,12 @@ function WeeklyOutputSection() {
   const template = useSettingsStore((s) => s.weeklyOutputTemplate);
   const saturdayTemplate = useSettingsStore((s) => s.saturdayOutputTemplate);
   const update = useSettingsStore((s) => s.update);
-  const points = useGoalStore((s) => s.points);
+  const weekPoints = useGoalStore((s) => s.week.points);
   const saturday = useGoalStore((s) => s.saturday);
   const lastWriteAt = useTextOutputStore((s) => s.weeklyLastWriteAt);
   const writeError = useTextOutputStore((s) => s.weeklyError);
-  const inWindow = isInSaturdayWindow();
+  const saturdayForced = useSettingsStore((s) => s.saturdayForced);
+  const inWindow = isInSaturdayWindow() || saturdayForced;
 
   return (
     <Card
@@ -514,7 +515,7 @@ function WeeklyOutputSection() {
         <p className="text-xs text-zinc-500">
           Preview:{" "}
           <span className="font-mono text-zinc-300">
-            {inWindow ? renderSaturdayText(saturday.points, saturdayTemplate) : renderWeeklyText(points, template)}
+            {inWindow ? renderSaturdayText(saturday.points, saturdayTemplate) : renderWeeklyText(weekPoints, template)}
           </span>
           {inWindow ? (
             <span className="ml-2 text-emerald-400">(showing Saturday goal now)</span>
