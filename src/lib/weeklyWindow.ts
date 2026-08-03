@@ -1,7 +1,7 @@
 /**
  * Time windows are in Pacific time (PT):
  *
- * WEEKLY: resets every Sunday 8:00 PM PT (display switches to the Saturday
+ * WEEKLY: resets every Sunday 7:00 PM PT (display switches to the Saturday
  * goal at 7 PM PT on Saturdays, see below, even though the weekly
  * counter itself keeps accumulating underneath)
  * SATURDAY: Saturday 7 PM PT → Sunday 7 PM PT (resets Saturday 7 PM)
@@ -29,6 +29,8 @@ const WEEKDAY_INDEX: Record<string, number> = {
 
 const SATURDAY_WINDOW_HOUR = 19;
 const SATURDAY_WINDOW_MINUTE = 0;
+const WEEKLY_RESET_HOUR = 19;
+const WEEKLY_RESET_MINUTE = 0;
 
 interface PacificParts {
   year: number;
@@ -90,26 +92,31 @@ function isAtOrPastWindowStart(hour: number, minute: number): boolean {
   return hour > SATURDAY_WINDOW_HOUR || (hour === SATURDAY_WINDOW_HOUR && minute >= SATURDAY_WINDOW_MINUTE);
 }
 
-/** Most recent Sunday 8 PM PT at or before `now`. */
+/** True once `hour:minute` is at or past the weekly reset time (7 PM). */
+function isAtOrPastWeeklyReset(hour: number, minute: number): boolean {
+  return hour > WEEKLY_RESET_HOUR || (hour === WEEKLY_RESET_HOUR && minute >= WEEKLY_RESET_MINUTE);
+}
+
+/** Most recent Sunday 7 PM PT at or before `now`. */
 export function weeklyStart(now: Date = new Date()): Date {
   const pt = getPacificParts(now);
-  // On Sunday itself: if it's already past 8pm, today is the reset day (0
-  // days back). If it's still before 8pm, this week's reset hasn't
+  // On Sunday itself: if it's already past 7pm, today is the reset day (0
+  // days back). If it's still before 7pm, this week's reset hasn't
   // happened yet, so the most recent one was last Sunday (7 days back).
-  const daysSinceSunday = pt.weekday === 0 ? (pt.hour >= 20 ? 0 : 7) : pt.weekday;
+  const daysSinceSunday = pt.weekday === 0 ? (isAtOrPastWeeklyReset(pt.hour, pt.minute) ? 0 : 7) : pt.weekday;
   const anchor = pacificToUtc(pt.year, pt.month, pt.day, 0, 0);
   const backOffMs = daysSinceSunday * 24 * 60 * 60 * 1000;
   const sundayMidnightUtc = new Date(anchor.getTime() - backOffMs);
   const sundayPt = getPacificParts(sundayMidnightUtc);
-  return pacificToUtc(sundayPt.year, sundayPt.month, sundayPt.day, 20, 0);
+  return pacificToUtc(sundayPt.year, sundayPt.month, sundayPt.day, WEEKLY_RESET_HOUR, WEEKLY_RESET_MINUTE);
 }
 
-/** Next Sunday 8 PM PT. */
+/** Next Sunday 7 PM PT. */
 export function nextWeeklyStart(now: Date = new Date()): Date {
   const start = weeklyStart(now);
   const sevenDaysLater = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
   const pt = getPacificParts(sevenDaysLater);
-  return pacificToUtc(pt.year, pt.month, pt.day, 20, 0);
+  return pacificToUtc(pt.year, pt.month, pt.day, WEEKLY_RESET_HOUR, WEEKLY_RESET_MINUTE);
 }
 
 /** Most recent Saturday 7 PM PT at or before `now`. */

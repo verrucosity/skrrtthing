@@ -5,7 +5,7 @@ subs and Streamlabs donations all feed one running counter, split into two
 goals: a weekly one and a Saturday one.
 
 **Weekly goal** climbs in steps of 57 (57, 114, 171, 228...) and resets every
-Sunday at 8pm Pacific.
+Sunday at 7pm Pacific.
 
 **Saturday goal** only shows up during a window from Saturday 7pm to Sunday
 7pm Pacific. It takes your weekly progress, subtracts whatever weekly

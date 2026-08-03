@@ -40,7 +40,7 @@ export function Statistics() {
           <EmptyState
             icon={History}
             title="No weeks finished yet"
-            hint="Every Sunday at 8pm PT, the current week gets saved here."
+            hint="Every Sunday at 7pm PT, the current week gets saved here."
           />
         ) : (
           <table className="w-full text-sm">

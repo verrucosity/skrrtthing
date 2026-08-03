@@ -2,7 +2,7 @@
  * Two goals that track differently:
  *
  * WEEKLY GOAL: 57, 114, 171, 228... forever, off the lifetime point total.
- * Its stats window resets Sunday 8pm Pacific, but the number itself never
+ * Its stats window resets Sunday 7pm Pacific, but the number itself never
  * goes back down.
  *
  * SATURDAY GOAL: 19, 38, 57, 76... The moment Saturday 7pm Pacific hits,
