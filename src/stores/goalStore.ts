@@ -162,7 +162,16 @@ export const useGoalStore = create<GoalStore>((set, get) => {
 
     async hydrate() {
       const saved = await loadData<GoalData>();
-      if (saved) set({ ...emptyData(), ...saved });
+      if (saved) {
+        // The old Starting Point logic (before week.points became the
+        // displayed number) could push week.points or the lifetime total
+        // negative behind the scenes without it ever being visible. Clamp
+        // both back to 0 on load so any old corruption self-heals instead
+        // of showing up as a negative goal number.
+        const points = Math.max(0, saved.points ?? 0);
+        const week = { ...saved.week, points: Math.max(0, saved.week?.points ?? 0) };
+        set({ ...emptyData(), ...saved, points, week });
+      }
       set({ hydrated: true });
       get().rolloverIfNeeded();
     },

@@ -5,6 +5,8 @@ import { EventLog } from "./pages/EventLog";
 import { Statistics } from "./pages/Statistics";
 import { Settings } from "./pages/Settings";
 import { Wizard } from "./pages/Wizard";
+import { UpdateModal } from "./components/UpdateModal";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useAppInit } from "./hooks/useAppInit";
 import { useTextOutput } from "./hooks/useTextOutput";
 import { useUpdateChecker } from "./hooks/useUpdateChecker";
@@ -49,8 +51,14 @@ export default function App() {
     <div className="flex h-screen bg-ink text-zinc-100">
       <Sidebar page={page} onNavigate={setPage} />
       <main className="flex-1 overflow-y-auto">
-        <Current />
+        {/* Keyed by page so switching pages clears a crash instead of getting stuck. */}
+        <ErrorBoundary key={page}>
+          <Current />
+        </ErrorBoundary>
       </main>
+      {/* Outside the page boundary above: a crash on one page (e.g. Settings)
+          can't take this down, so the update is always reachable. */}
+      <UpdateModal />
     </div>
   );
 }
