@@ -24,75 +24,99 @@ export function GoalHero() {
   const saturdayStep = useSettingsStore((s) => s.saturdayStepOverride) ?? SATURDAY_STEP;
   const now = useNow();
 
-  const target = weeklyTarget(weekPoints, weeklyStep);
-  const { done, ratio } = weeklyProgress(weekPoints, weeklyStep);
-  const completed = completedWeeklyGoals(weekPoints, weeklyStep);
+  const weeklyTargetValue = weeklyTarget(weekPoints, weeklyStep);
+  const weeklyProg = weeklyProgress(weekPoints, weeklyStep);
+  const weeklyCompleted = completedWeeklyGoals(weekPoints, weeklyStep);
+
+  const saturdayTargetValue = saturdayTarget(saturday.points, saturdayStep);
+  const saturdayProg = weeklyProgress(saturday.points, saturdayStep);
   const saturdayCompleted = completedSaturdayGoals(saturday.points, saturdayStep);
+
   const inSaturdayWindow = isInSaturdayWindow(now) || saturdayForced;
+
+  const weeklyGoal = {
+    label: "Weekly Goal",
+    current: weekPoints,
+    target: weeklyTargetValue,
+    step: weeklyStep,
+    done: weeklyProg.done,
+    ratio: weeklyProg.ratio,
+    completed: weeklyCompleted,
+    stars: weeklyStars(weekPoints, weeklyStep),
+  };
+  const saturdayGoal = {
+    label: "Saturday Goal",
+    current: saturday.points,
+    target: saturdayTargetValue,
+    step: saturdayStep,
+    done: saturdayProg.done,
+    ratio: saturdayProg.ratio,
+    completed: saturdayCompleted,
+    stars: saturdayStars(saturday.points, saturdayStep),
+  };
+
+  const big = inSaturdayWindow ? saturdayGoal : weeklyGoal;
+  const small = inSaturdayWindow ? weeklyGoal : saturdayGoal;
+  const smallStatus = inSaturdayWindow
+    ? "(frozen, Saturday's active)"
+    : "(inactive)";
+  const smallNote = !inSaturdayWindow ? "Activates Saturday 7pm PT" : null;
 
   return (
     <section className="rounded-lg border border-edge bg-surface px-6 py-7">
       <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Weekly Goal {inSaturdayWindow && <span className="text-accent-hover">(frozen, Saturday's active)</span>}
+        {big.label}
       </p>
       <div className="flex items-end justify-center gap-3">
         <span className="text-6xl font-bold tabular-nums tracking-tight text-zinc-50">
-          {formatPoints(weekPoints)}
+          {formatPoints(big.current)}
           <span className="mx-3 text-zinc-600">/</span>
-          {formatPoints(target)}
+          {formatPoints(big.target)}
         </span>
-        {completed > 0 && (
+        {big.completed > 0 && (
           <span
             className="pb-1.5 font-mono text-2xl tracking-widest text-accent-hover"
-            title={`${completed} weekly goal${completed === 1 ? "" : "s"} completed this week`}
+            title={`${big.completed} ${big.label.toLowerCase()}${big.completed === 1 ? "" : "s"} completed`}
           >
-            {weeklyStars(weekPoints, weeklyStep)}
+            {big.stars}
           </span>
         )}
       </div>
       <p className="mt-1 text-center text-xs text-zinc-600" title="Exact stored value, only you see this">
-        {formatPointsExact(weekPoints)} exact
+        {formatPointsExact(big.current)} exact
       </p>
 
       <div className="mx-auto mt-6 max-w-xl">
-        <ProgressBar ratio={ratio} />
+        <ProgressBar ratio={big.ratio} />
         <div className="mt-2 flex justify-between text-xs text-zinc-500">
           <span>
-            {formatPoints(done)} / {weeklyStep} toward goal #{completed + 1}
+            {formatPoints(big.done)} / {big.step} toward goal #{big.completed + 1}
           </span>
-          <span>{formatPoints(weeklyStep - done)} to go</span>
+          <span>{formatPoints(big.step - big.done)} to go</span>
         </div>
       </div>
 
       <div className="mx-auto mt-6 max-w-xl border-t border-edge pt-4 text-center">
         <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Saturday Goal {inSaturdayWindow ? "(active)" : "(inactive)"}
+          {small.label} {smallStatus}
         </p>
         <div className="flex items-center justify-center gap-2">
-          <p
-            className={
-              inSaturdayWindow
-                ? "text-2xl font-semibold tabular-nums text-zinc-100"
-                : "text-2xl font-semibold tabular-nums text-zinc-600"
-            }
-          >
-            {formatPoints(saturday.points)} / {saturdayTarget(saturday.points, saturdayStep)}
+          <p className="text-2xl font-semibold tabular-nums text-zinc-600">
+            {formatPoints(small.current)} / {small.target}
           </p>
-          {saturdayCompleted > 0 && (
+          {small.completed > 0 && (
             <span
               className="font-mono text-lg tracking-widest text-accent-hover"
-              title={`${saturdayCompleted} Saturday goal${saturdayCompleted === 1 ? "" : "s"} completed`}
+              title={`${small.completed} ${small.label.toLowerCase()}${small.completed === 1 ? "" : "s"} completed`}
             >
-              {saturdayStars(saturday.points, saturdayStep)}
+              {small.stars}
             </span>
           )}
         </div>
         <p className="mt-1 text-xs text-zinc-600" title="Exact stored value, only you see this">
-          {formatPointsExact(saturday.points)} exact
+          {formatPointsExact(small.current)} exact
         </p>
-        {!inSaturdayWindow && (
-          <p className="mt-1 text-xs text-zinc-600">Activates Saturday 7pm PT</p>
-        )}
+        {smallNote && <p className="mt-1 text-xs text-zinc-600">{smallNote}</p>}
       </div>
     </section>
   );
