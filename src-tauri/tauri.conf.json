@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "SkrrtMath",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "identifier": "app.skrrt-goal-thingy.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://api.twitch.tv https://id.twitch.tv wss://eventsub.wss.twitch.tv https://sockets.streamlabs.com wss://sockets.streamlabs.com https://api.github.com"
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://api.twitch.tv https://id.twitch.tv wss://eventsub.wss.twitch.tv https://sockets.streamlabs.com wss://sockets.streamlabs.com https://api.github.com https://raw.githubusercontent.com"
     }
   },
   "bundle": {

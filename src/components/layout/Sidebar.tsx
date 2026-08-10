@@ -2,6 +2,7 @@ import { BarChart3, LayoutDashboard, ScrollText, Settings, Target } from "lucide
 import clsx from "clsx";
 import { useConnectionStore } from "../../stores/connectionStore";
 import { StatusDot } from "../ui/StatusDot";
+import { FeedbackButton } from "../FeedbackButton";
 import type { PageId } from "../../pages";
 
 const nav: Array<{ id: PageId; label: string; icon: typeof LayoutDashboard }> = [
@@ -46,6 +47,10 @@ export function Sidebar({ page, onNavigate }: SidebarProps) {
           </button>
         ))}
       </nav>
+
+      <div className="px-2 pb-1">
+        <FeedbackButton />
+      </div>
 
       <div className="space-y-1.5 border-t border-edge px-4 py-3 text-xs text-zinc-500">
         <div className="flex items-center gap-2">

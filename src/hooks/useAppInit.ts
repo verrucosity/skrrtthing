@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGoalStore } from "../stores/goalStore";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useConnectionStore } from "../stores/connectionStore";
+import { useFeedbackStore } from "../stores/feedbackStore";
 
 /**
  * One-time startup: hydrate persisted state, auto-connect if configured,
@@ -19,6 +20,7 @@ export function useAppInit(): boolean {
       await Promise.all([
         useGoalStore.getState().hydrate(),
         useSettingsStore.getState().hydrate(),
+        useFeedbackStore.getState().hydrate(),
       ]);
 
       const settings = useSettingsStore.getState();

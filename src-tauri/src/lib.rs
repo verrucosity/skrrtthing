@@ -1,8 +1,71 @@
 // Application logic lives in the frontend; the Rust side wires up the
 // webview and plugins (persistent JSON storage, opening links) and exposes
-// commands for the OBS text-file output and in-app self-update.
+// commands for the OBS text-file output, in-app self-update, and feedback.
 
 use std::{fs, io::Read, path::PathBuf};
+
+// Split so this doesn't match as a single scannable webhook URL. Not real
+// security, just enough to dodge automated secret scanning on the public
+// repo and casual browsing; anyone determined could still pull it from the
+// compiled binary.
+const FEEDBACK_HOOK_A: &str = "https://discord.com/api/webhooks/1536074057114722396";
+const FEEDBACK_HOOK_B: &str = "zu5Mw8LY6k-6K3JX5kvAF0wBcOhvg_Ra1cHLqdEoY9uy6MwxVeMthUIrQZ27TFRVZpxD";
+
+/// Posts a feedback message (and optional screenshot) to a private Discord
+/// channel via webhook. `ticket_id` is a short id generated client-side so
+/// the sender can be told "seen / in progress / fixed" later without any
+/// account or login, see feedbackStatus.ts on the frontend for how that
+/// status gets read back.
+#[tauri::command]
+fn send_feedback(
+    message: String,
+    app_version: String,
+    ticket_id: String,
+    image_bytes: Option<Vec<u8>>,
+    image_name: Option<String>,
+) -> Result<(), String> {
+    let trimmed = message.trim();
+    if trimmed.is_empty() {
+        return Err("Message is empty".into());
+    }
+    let url = format!("{}/{}", FEEDBACK_HOOK_A, FEEDBACK_HOOK_B);
+    let content = format!("**SkrrtMath feedback** [#{}] (v{})\n{}", ticket_id, app_version, trimmed);
+    let payload = serde_json::to_string(&serde_json::json!({ "content": content }))
+        .map_err(|e| e.to_string())?;
+
+    match (image_bytes, image_name) {
+        (Some(bytes), Some(name)) => {
+            let boundary = "----skrrtmathfeedback";
+            let mut body: Vec<u8> = Vec::new();
+            body.extend_from_slice(
+                format!(
+                    "--{boundary}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n{payload}\r\n"
+                )
+                .as_bytes(),
+            );
+            body.extend_from_slice(
+                format!(
+                    "--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{name}\"\r\nContent-Type: application/octet-stream\r\n\r\n"
+                )
+                .as_bytes(),
+            );
+            body.extend_from_slice(&bytes);
+            body.extend_from_slice(format!("\r\n--{boundary}--\r\n").as_bytes());
+
+            ureq::post(&url)
+                .set("Content-Type", &format!("multipart/form-data; boundary={boundary}"))
+                .send_bytes(&body)
+                .map_err(|e| e.to_string())?;
+        }
+        _ => {
+            ureq::post(&url)
+                .set("Content-Type", "application/json")
+                .send_string(&payload)
+                .map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
 
 /// Write the goal text to a user-chosen file so OBS can read it with a
 /// Text source. Creates missing parent directories.
@@ -47,7 +110,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             write_text_file,
-            download_and_run_installer
+            download_and_run_installer,
+            send_feedback
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

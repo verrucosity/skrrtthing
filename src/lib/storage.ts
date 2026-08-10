@@ -49,10 +49,13 @@ function backend(file: string): Backend {
 
 const settingsFile = backend("settings.json");
 const dataFile = backend("data.json");
+const feedbackFile = backend("feedback.json");
 
 export const loadSettings = <T>() => settingsFile.get<T>("settings");
 export const loadData = <T>() => dataFile.get<T>("state");
 export const saveSettings = (value: unknown) => settingsFile.set("settings", value);
+export const loadFeedback = <T>() => feedbackFile.get<T>("tickets");
+export const saveFeedback = (value: unknown) => feedbackFile.set("tickets", value);
 
 let pending: unknown = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
