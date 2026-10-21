@@ -39,6 +39,9 @@ function emptyData(now = new Date()): GoalData {
       bits: 0,
       subs: 0,
       donationCents: 0,
+      pointsFromBits: 0,
+      pointsFromSubs: 0,
+      pointsFromDonations: 0,
     },
     saturday: {
       windowStart: null,
@@ -193,7 +196,11 @@ export const useGoalStore = create<GoalStore>((set, get) => {
             totalBits: s.stats.totalBits + bits,
             pointsFromBits: roundPoints(s.stats.pointsFromBits + points),
           },
-          week: { ...s.week, bits: s.week.bits + bits },
+          week: {
+            ...s.week,
+            bits: s.week.bits + bits,
+            pointsFromBits: roundPoints((s.week.pointsFromBits ?? 0) + points),
+          },
         }),
       );
     },
@@ -214,7 +221,11 @@ export const useGoalStore = create<GoalStore>((set, get) => {
             totalSubs: s.stats.totalSubs + 1,
             pointsFromSubs: roundPoints(s.stats.pointsFromSubs + points),
           },
-          week: { ...s.week, subs: s.week.subs + 1 },
+          week: {
+            ...s.week,
+            subs: s.week.subs + 1,
+            pointsFromSubs: roundPoints((s.week.pointsFromSubs ?? 0) + points),
+          },
         }),
       );
     },
@@ -236,7 +247,11 @@ export const useGoalStore = create<GoalStore>((set, get) => {
             totalGiftSubs: s.stats.totalGiftSubs + count,
             pointsFromSubs: roundPoints(s.stats.pointsFromSubs + points),
           },
-          week: { ...s.week, subs: s.week.subs + count },
+          week: {
+            ...s.week,
+            subs: s.week.subs + count,
+            pointsFromSubs: roundPoints((s.week.pointsFromSubs ?? 0) + points),
+          },
         }),
       );
     },
@@ -259,7 +274,11 @@ export const useGoalStore = create<GoalStore>((set, get) => {
             totalDonationCents: s.stats.totalDonationCents + cents,
             pointsFromDonations: roundPoints(s.stats.pointsFromDonations + points),
           },
-          week: { ...s.week, donationCents: s.week.donationCents + cents },
+          week: {
+            ...s.week,
+            donationCents: s.week.donationCents + cents,
+            pointsFromDonations: roundPoints((s.week.pointsFromDonations ?? 0) + points),
+          },
         }),
       );
     },
@@ -302,6 +321,9 @@ export const useGoalStore = create<GoalStore>((set, get) => {
           bits: 0,
           subs: 0,
           donationCents: 0,
+          pointsFromBits: 0,
+          pointsFromSubs: 0,
+          pointsFromDonations: 0,
         },
       });
       persist();

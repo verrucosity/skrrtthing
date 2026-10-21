@@ -2,13 +2,13 @@ import { useGoalStore } from "../../stores/goalStore";
 import { formatPoints } from "../../lib/format";
 import { Card } from "../ui/Card";
 
-/** Where lifetime points have come from, as simple proportional bars. */
+/** Where this week's points have come from, as simple proportional bars. */
 export function BreakdownCard() {
-  const stats = useGoalStore((s) => s.stats);
+  const week = useGoalStore((s) => s.week);
   const rows = [
-    { label: "Bits", points: stats.pointsFromBits },
-    { label: "Subs", points: stats.pointsFromSubs },
-    { label: "Donations", points: stats.pointsFromDonations },
+    { label: "Bits", points: week.pointsFromBits ?? 0 },
+    { label: "Subs", points: week.pointsFromSubs ?? 0 },
+    { label: "Donations", points: week.pointsFromDonations ?? 0 },
   ];
   const max = Math.max(1, ...rows.map((r) => r.points));
 

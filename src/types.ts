@@ -37,6 +37,10 @@ export interface WeekState {
   bits: number;
   subs: number;
   donationCents: number;
+  /** This week's points by source. Optional because older saves predate them. */
+  pointsFromBits?: number;
+  pointsFromSubs?: number;
+  pointsFromDonations?: number;
 }
 
 export interface WeekSummary {
